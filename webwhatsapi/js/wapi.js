@@ -690,44 +690,6 @@ window.WAPI.ReplyMessage = function (idMessage, message, done) {
     }
 };
 
-window.WAPI.sendMessageToID = function (id, message, done) {
-    try {
-        var idUser = new window.Store.UserConstructor(id);
-        // create new chat
-        return Store.Chat.find(idUser).then((chat) => {
-            if (done !== undefined) {
-                chat.sendMessage(message).then(function () {
-                    done(true);
-                });
-                return true;
-            } else {
-                chat.sendMessage(message);
-                return true;
-            }
-        });
-    } catch (e) {
-        if (window.Store.Chat.length === 0)
-            return false;
-
-        firstChat = Store.Chat.models[0];
-        var originalID = firstChat.id;
-        firstChat.id = typeof originalID === "string" ? id : new window.Store.UserConstructor(id);
-        if (done !== undefined) {
-            firstChat.sendMessage(message).then(function () {
-                firstChat.id = originalID;
-                done(true);
-            });
-            return true;
-        } else {
-            firstChat.sendMessage(message);
-            firstChat.id = originalID;
-            return true;
-        }
-    }
-    if (done !== undefined) done(false);
-    return false;
-}
-
 window.WAPI.sendMessage = function (id, message, done) {
     var chat = window.WAPI.getChat(id);
     if (chat !== undefined) {
@@ -1031,6 +993,35 @@ window.WAPI.deleteConversation = function (chatId, done) {
             done(false);
         }
     });
+
+    return true;
+};
+
+window.WAPI.deleteMessage = function (chatId, messageArray, revoke=false, done) {
+    let userId = new window.Store.UserConstructor(chatId);
+    let conversation = window.Store.Chat.get(userId);
+
+    if(!conversation) {
+        if(done !== undefined) {
+            done(false);
+        }
+        return false;
+    }
+	
+	if (!Array.isArray(messageArray)) {
+        messageArray = [messageArray];
+    }
+
+	if(revoke){
+		conversation.sendRevokeMsgs(messageArray, conversation);	
+	}else{
+		conversation.sendDeleteMsgs(messageArray, conversation);	
+	}
+    
+
+    if (done !== undefined) {
+        done(true);
+    }
 
     return true;
 };
