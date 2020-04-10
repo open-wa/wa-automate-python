@@ -187,7 +187,7 @@ class WhatsAPIDriver(object):
             options = Options()
 
             if headless:
-                options.set_headless()
+                options.headless = True
 
             options.profile = self._profile
 
@@ -210,11 +210,14 @@ class WhatsAPIDriver(object):
         elif self.client == "chrome":
             self._profile = webdriver.ChromeOptions()
             if self._profile_path is not None:
-                self._profile.add_argument("user-data-dir=%s" % self._profile_path)
+                self._profile.add_argument("--user-data-dir=%s" % self._profile_path)
             if proxy is not None:
                 self._profile.add_argument('--proxy-server=%s' % proxy)
             if headless:
-                self._profile.add_argument('headless')
+                self._profile.add_argument('--headless')
+                self._profile.add_argument('--disable-gpu')
+                self._profile.add_argument('--remote-debugging-port=9222')
+                self._profile.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36')
             if chrome_options is not None:
                 for option in chrome_options:
                     self._profile.add_argument(option)
