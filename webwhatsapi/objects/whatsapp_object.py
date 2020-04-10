@@ -77,6 +77,8 @@ class WhatsappObjectWithId(WhatsappObject):
                 self.id = js_obj["id"]
         if 'name' in js_obj:
             self.name = js_obj["name"]
+        if 'contact' in js_obj:
+            self.name = js_obj["contact"]['name']
 
     def __hash__(self):
         return hash(self.id)

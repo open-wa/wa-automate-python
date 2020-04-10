@@ -218,8 +218,13 @@ class WhatsAPIDriver(object):
             if chrome_options is not None:
                 for option in chrome_options:
                     self._profile.add_argument(option)
-            self.logger.info("Starting webdriver")
-            self.driver = webdriver.Chrome(chrome_options=self._profile, **extra_params)
+
+            if executable_path is not None:
+                self.logger.info("Starting webdriver")
+                self.driver = webdriver.Chrome(executable_path=executable_path, chrome_options=self._profile, **extra_params)
+            else:
+                self.logger.info("Starting webdriver")
+                self.driver = webdriver.Chrome(chrome_options=self._profile, **extra_params)
 
         elif client == 'remote':
             if self._profile_path is not None:
@@ -612,22 +617,18 @@ class WhatsAPIDriver(object):
         filename = os.path.split(path)[-1]
         return self.wapi_functions.sendImage(imgBase64, chatid, filename, caption)
 
-    def send_message_with_thumbnail(self, path, chatid, url, title, description, text):
+    def send_message_with_thumbnail(self, path, chatid, url, title, description):
         """
             converts the file to base64 and sends it using the sendImage function of wapi.js
-        PS: The first link in text must be equals to url or thumbnail will not appear.
         :param path: image file path
         :param chatid: chatId to be sent
         :param url: of thumbnail
         :param title: of thumbnail
         :param description: of thumbnail
-        :param text: under thumbnail
         :return:
         """
         imgBase64 = self.convert_to_base64(path, is_thumbnail=True)
-        if url not in text:
-            return False
-        return self.wapi_functions.sendMessageWithThumb(imgBase64, url, title, description, text, chatid)
+        return self.wapi_functions.sendMessageWithThumb(imgBase64, url, title, description, chatid)
 
     def chat_send_seen(self, chat_id):
         """
@@ -657,7 +658,7 @@ class WhatsAPIDriver(object):
         participant_ids = self.group_get_participants_ids(group_id)
 
         for participant_id in participant_ids:
-            yield self.get_contact_from_id(participant_id['_serialized'])
+            yield self.get_contact_from_id(participant_id)
 
     def group_get_admin_ids(self, group_id):
         return self.wapi_functions.getGroupAdmins(group_id)
@@ -731,13 +732,6 @@ class WhatsAPIDriver(object):
         decryptor = cr_obj.decryptor()
         return BytesIO(decryptor.update(e_file) + decryptor.finalize())
 
-    def mark_default_unread_messages(self):
-        """
-        Look for the latest unreplied messages received and mark them as unread.
-
-        """
-        self.wapi_functions.markDefaultUnreadMessages()
-
     def get_battery_level(self):
         """
         Check the battery level of device
@@ -773,7 +767,7 @@ class WhatsAPIDriver(object):
         :param revoke: Set to true so the message will be deleted for everyone, not only you
         :return:
         """
-        return self.wapi_functions.deleteMessage(chat_id, message_array, revoke=False)
+        return self.wapi_functions.deleteMessage(chat_id, message_array, revoke)
 
     def check_number_status(self, number_id):
         """
@@ -805,11 +799,14 @@ class WhatsAPIDriver(object):
     def contact_unblock(self, id):
         return self.wapi_functions.contactUnblock(id)
 
+    def add_participant_group(self, idGroup, idParticipant):
+        return self.wapi_functions.addParticipant(idGroup, idParticipant)
+
     def remove_participant_group(self, idGroup, idParticipant):
-        return self.wapi_functions.removeParticipantGroup(idGroup, idParticipant)
+        return self.wapi_functions.removeParticipant(idGroup, idParticipant)
 
     def promove_participant_admin_group(self, idGroup, idParticipant):
-        return self.wapi_functions.promoteParticipantAdminGroup(idGroup, idParticipant)
+        return self.wapi_functions.promoteParticipant(idGroup, idParticipant)
 
     def demote_participant_admin_group(self, idGroup, idParticipant):
-        return self.wapi_functions.demoteParticipantAdminGroup(idGroup, idParticipant)
+        return self.wapi_functions.demoteParticipant(idGroup, idParticipant)
