@@ -64,8 +64,7 @@ class WapiJsWrapper(object):
         except NameError:
             script_path = os.getcwd()
 
-        result = self.driver.execute_script(
-            "if (document.querySelector('*[data-icon=chat]') !== null) { return true } else { return false }")  # noqa E501
+        result = self.driver.execute_script("if (document.querySelector('*[data-icon=chat]') !== null) { return true } else { return false }")  # noqa E501
         if result:
             with open(os.path.join(script_path, "js", "wapi.js"), "r") as script:
                 self.driver.execute_script(script.read())
