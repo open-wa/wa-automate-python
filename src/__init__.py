@@ -9,11 +9,10 @@ import logging
 import os
 import shutil
 import tempfile
-from base64 import b64decode, b64encode
+from base64 import b64decode
 from io import BytesIO
 from json import dumps, loads
 
-import magic
 from axolotl.kdf.hkdfv3 import HKDFv3
 from axolotl.util.byteutil import ByteUtil
 from cryptography.hazmat.backends import default_backend
@@ -26,6 +25,7 @@ from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
+from .helper import convert_to_base64
 from .objects.chat import UserChat, factory_chat
 from .objects.contact import Contact
 from .objects.message import MessageGroup, factory_message
@@ -252,6 +252,29 @@ class WhatsAPIDriver(object):
         if autoconnect:
             self.connect()
 
+    def get_status(self):
+        """
+        Returns status of the driver
+
+        :return: Status
+        :rtype: WhatsAPIDriverStatus
+        """
+        if self.driver is None:
+            return WhatsAPIDriverStatus.NotConnected
+        if self.driver.session_id is None:
+            return WhatsAPIDriverStatus.NotConnected
+        try:
+            self.driver.find_element_by_css_selector(self._SELECTORS['mainPage'])
+            return WhatsAPIDriverStatus.LoggedIn
+        except NoSuchElementException:
+            pass
+        try:
+            self.driver.find_element_by_css_selector(self._SELECTORS['qrCode'])
+            return WhatsAPIDriverStatus.NotLoggedIn
+        except NoSuchElementException:
+            pass
+        return WhatsAPIDriverStatus.Unknown
+
     def connect(self):
         self.driver.get(self._URL)
 
@@ -268,6 +291,13 @@ class WhatsAPIDriver(object):
 
             self.driver.refresh()
 
+    def quit(self):
+        self.wapi_functions.quit()
+        self.driver.quit()
+
+    ###########################################
+    # API Methods
+    ###########################################
     def is_logged_in(self):
         """Returns if user is logged. Can be used if non-block needed for wait_for_login"""
 
@@ -286,6 +316,20 @@ class WhatsAPIDriver(object):
             EC.visibility_of_element_located((By.CSS_SELECTOR, self._SELECTORS['mainPage']))
         )
 
+    def screenshot(self, filename):
+        self.driver.get_screenshot_as_file(filename)
+
+    def get_battery_level(self):
+        """
+        Check the battery level of device
+
+        :return: int: Battery level
+        """
+        return self.wapi_functions.getBatteryLevel()
+
+    #################
+    # QR
+    #################
     def get_qr_plain(self):
         return self.driver.find_element_by_css_selector(self._SELECTORS['qrCodePlain']).get_attribute("data-ref")
 
@@ -311,8 +355,77 @@ class WhatsAPIDriver(object):
 
         return qr.screenshot_as_base64
 
-    def screenshot(self, filename):
-        self.driver.get_screenshot_as_file(filename)
+    def reload_qr(self):
+        self.driver.find_element_by_css_selector(self._SELECTORS['QRReloader']).click()
+
+    #################
+    # Chats & Contacts
+    #################
+    def get_contact_from_id(self, contact_id):
+        """
+        Fetches a contact given its ID
+
+        :param contact_id: Contact ID
+        :type contact_id: str
+        :return: Contact or Error
+        :rtype: Contact
+        """
+        contact = self.wapi_functions.getContact(contact_id)
+
+        if contact is None:
+            raise ContactNotFoundError("Contact {0} not found".format(contact_id))
+
+        return Contact(contact, self)
+
+    def get_chat_from_id(self, chat_id):
+        """
+        Fetches a chat given its ID
+
+        :param chat_id: Chat ID
+        :type chat_id: str
+        :return: Chat or Error
+        :rtype: Chat
+        """
+        chat = self.wapi_functions.getChatById(chat_id)
+        if chat:
+            return factory_chat(chat, self)
+
+        raise ChatNotFoundError("Chat {0} not found".format(chat_id))
+
+    def get_chat_from_name(self, chat_name):
+        """
+        Fetches a chat given its name
+
+        :param chat_name: Chat name
+        :type chat_name: str
+        :return: Chat or Error
+        :rtype: Chat
+        """
+        chat = self.wapi_functions.getChatByName(chat_name)
+        if chat:
+            return factory_chat(chat, self)
+
+        raise ChatNotFoundError("Chat {0} not found".format(chat_name))
+
+    def get_chat_from_phone_number(self, number):
+        """
+        Gets chat by phone number
+        Number format should be as it appears in Whatsapp ID
+        For example, for the number:
+        +972-51-234-5678
+        This function would receive:
+        972512345678
+
+        :param number: Phone number
+        :return: Chat
+        :rtype: Chat
+        """
+        for chat in self.get_all_chats():
+            if not isinstance(chat, UserChat) or number not in chat.id:
+                continue
+            return chat
+
+        raise ChatNotFoundError('Chat for phone {0} not found'.format(number))
 
     def get_contacts(self):
         """
@@ -358,6 +471,85 @@ class WhatsAPIDriver(object):
         """
         return self.wapi_functions.getAllChatIds()
 
+    def chat_send_seen(self, chat_id):
+        """
+        Send a seen to a chat given its ID
+
+        :param chat_id: Chat ID
+        :type chat_id: str
+        """
+        return self.wapi_functions.sendSeen(chat_id)
+
+    def chat_load_earlier_messages(self, chat_id):
+        self.wapi_functions.loadEarlierMessages(chat_id)
+
+    def chat_load_all_earlier_messages(self, chat_id):
+        self.wapi_functions.loadAllEarlierMessages(chat_id)
+
+    def async_chat_load_all_earlier_messages(self, chat_id):
+        self.wapi_functions.asyncLoadAllEarlierMessages(chat_id)
+
+    def are_all_messages_loaded(self, chat_id):
+        return self.wapi_functions.areAllMessagesLoaded(chat_id)
+
+    def get_profile_pic_from_id(self, id):
+        """
+        Get full profile pic from an id
+        The ID must be on your contact book to
+        successfully get their profile picture.
+
+        :param id: ID
+        :type id: str
+        """
+        profile_pic = self.wapi_functions.getProfilePicFromId(id)
+        if profile_pic:
+            return b64decode(profile_pic)
+        else:
+            return False
+
+    def get_profile_pic_small_from_id(self, id):
+        """
+        Get small profile pic from an id
+        The ID must be on your contact book to
+        successfully get their profile picture.
+
+        :param id: ID
+        :type id: str
+        """
+        profile_pic_small = self.wapi_functions.getProfilePicSmallFromId(id)
+        if profile_pic_small:
+            return b64decode(profile_pic_small)
+        else:
+            return False
+
+    def check_number_status(self, number_id):
+        """
+        Check if a number is valid/registered in the whatsapp service
+
+        :param number_id: number id
+        :return:
+        """
+        number_status = self.wapi_functions.checkNumberStatus(number_id)
+        return NumberStatus(number_status, self)
+
+    def contact_block(self, id):
+        return self.wapi_functions.contactBlock(id)
+
+    def contact_unblock(self, id):
+        return self.wapi_functions.contactUnblock(id)
+
+    def delete_chat(self, chat_id):
+        """
+        Delete a chat
+
+        :param chat_id: id of chat
+        :return:
+        """
+        return self.wapi_functions.deleteConversation(chat_id)
+
+    #################
+    # Messages
+    #################
     def get_unread(self, include_me=False, include_notifications=False, use_unread_count=False):
         """
         Fetches unread messages
@@ -458,115 +650,6 @@ class WhatsAPIDriver(object):
 
         return result
 
-    def get_contact_from_id(self, contact_id):
-        """
-        Fetches a contact given its ID
-
-        :param contact_id: Contact ID
-        :type contact_id: str
-        :return: Contact or Error
-        :rtype: Contact
-        """
-        contact = self.wapi_functions.getContact(contact_id)
-
-        if contact is None:
-            raise ContactNotFoundError("Contact {0} not found".format(contact_id))
-
-        return Contact(contact, self)
-
-    def get_chat_from_id(self, chat_id):
-        """
-        Fetches a chat given its ID
-
-        :param chat_id: Chat ID
-        :type chat_id: str
-        :return: Chat or Error
-        :rtype: Chat
-        """
-        chat = self.wapi_functions.getChatById(chat_id)
-        if chat:
-            return factory_chat(chat, self)
-
-        raise ChatNotFoundError("Chat {0} not found".format(chat_id))
-
-    def get_chat_from_name(self, chat_name):
-        """
-        Fetches a chat given its name
-
-        :param chat_name: Chat name
-        :type chat_name: str
-        :return: Chat or Error
-        :rtype: Chat
-        """
-        chat = self.wapi_functions.getChatByName(chat_name)
-        if chat:
-            return factory_chat(chat, self)
-
-        raise ChatNotFoundError("Chat {0} not found".format(chat_name))
-
-    def get_chat_from_phone_number(self, number, createIfNotFound=False):
-        """
-        Gets chat by phone number
-        Number format should be as it appears in Whatsapp ID
-        For example, for the number:
-        +972-51-234-5678
-        This function would receive:
-        972512345678
-
-        :param number: Phone number
-        :return: Chat
-        :rtype: Chat
-        """
-        for chat in self.get_all_chats():
-            if not isinstance(chat, UserChat) or number not in chat.id:
-                continue
-            return chat
-        if createIfNotFound:
-            self.create_chat_by_number(number)
-            self.wait_for_login()
-            for chat in self.get_all_chats():
-                if not isinstance(chat, UserChat) or number not in chat.id:
-                    continue
-                return chat
-
-        raise ChatNotFoundError('Chat for phone {0} not found'.format(number))
-
-    def reload_qr(self):
-        self.driver.find_element_by_css_selector(self._SELECTORS['QRReloader']).click()
-
-    def get_status(self):
-        """
-        Returns status of the driver
-
-        :return: Status
-        :rtype: WhatsAPIDriverStatus
-        """
-        if self.driver is None:
-            return WhatsAPIDriverStatus.NotConnected
-        if self.driver.session_id is None:
-            return WhatsAPIDriverStatus.NotConnected
-        try:
-            self.driver.find_element_by_css_selector(self._SELECTORS['mainPage'])
-            return WhatsAPIDriverStatus.LoggedIn
-        except NoSuchElementException:
-            pass
-        try:
-            self.driver.find_element_by_css_selector(self._SELECTORS['qrCode'])
-            return WhatsAPIDriverStatus.NotLoggedIn
-        except NoSuchElementException:
-            pass
-        return WhatsAPIDriverStatus.Unknown
-
-    def contact_get_common_groups(self, contact_id):
-        """
-        Returns groups common between a user and the contact with given id.
-
-        :return: Contact or Error
-        :rtype: Contact
-        """
-        for group in self.wapi_functions.getCommonGroups(contact_id):
-            yield factory_chat(group, self)
-
     def chat_send_message(self, chat_id, message):
         result = self.wapi_functions.sendMessage(chat_id, message)
 
@@ -581,33 +664,6 @@ class WhatsAPIDriver(object):
             return factory_message(result, self)
         return result
 
-    def send_message_to_id(self, recipient, message):
-        """
-        Send a message to a chat given its ID
-
-        :param recipient: Chat ID
-        :type recipient: str
-        :param message: Plain-text message to be sent.
-        :type message: str
-        """
-        return self.wapi_functions.sendMessageToID(recipient, message)
-
-    def convert_to_base64(self, path, is_thumbnail=False):
-        """
-        :param path: file path
-        :return: returns the converted string and formatted for the send media function send_media
-        """
-
-        mime = magic.Magic(mime=True)
-        content_type = mime.from_file(path)
-        archive = ''
-        with open(path, "rb") as image_file:
-            archive = b64encode(image_file.read())
-            archive = archive.decode('utf-8')
-        if is_thumbnail:
-            return archive
-        return 'data:' + content_type + ';base64,' + archive
-
     def send_media(self, path, chatid, caption):
         """
             converts the file to base64 and sends it using the sendImage function of wapi.js
@@ -616,7 +672,7 @@ class WhatsAPIDriver(object):
         :param caption:
         :return:
         """
-        imgBase64 = self.convert_to_base64(path)
+        imgBase64 = convert_to_base64(path)
         filename = os.path.split(path)[-1]
         return self.wapi_functions.sendImage(imgBase64, chatid, filename, caption)
 
@@ -630,29 +686,59 @@ class WhatsAPIDriver(object):
         :param description: of thumbnail
         :return:
         """
-        imgBase64 = self.convert_to_base64(path, is_thumbnail=True)
+        imgBase64 = convert_to_base64(path, is_thumbnail=True)
         return self.wapi_functions.sendMessageWithThumb(imgBase64, url, title, description, chatid)
 
-    def chat_send_seen(self, chat_id):
+    def delete_message(self, chat_id, message_array, revoke=False):
         """
-        Send a seen to a chat given its ID
+        Delete a chat
 
-        :param chat_id: Chat ID
-        :type chat_id: str
+        :param chat_id: id of chat
+        :param message_array: one or more message(s) id
+        :param revoke: Set to true so the message will be deleted for everyone, not only you
+        :return:
         """
-        return self.wapi_functions.sendSeen(chat_id)
+        return self.wapi_functions.deleteMessage(chat_id, message_array, revoke)
 
-    def chat_load_earlier_messages(self, chat_id):
-        self.wapi_functions.loadEarlierMessages(chat_id)
+    def download_media(self, media_msg, force_download=False):
+        if not force_download:
+            try:
+                if media_msg.content:
+                    return BytesIO(b64decode(media_msg.content))
+            except AttributeError:
+                pass
 
-    def chat_load_all_earlier_messages(self, chat_id):
-        self.wapi_functions.loadAllEarlierMessages(chat_id)
+        file_data = b64decode(self.wapi_functions.downloadFile(media_msg.client_url))
 
-    def async_chat_load_all_earlier_messages(self, chat_id):
-        self.wapi_functions.asyncLoadAllEarlierMessages(chat_id)
+        if not file_data:
+            raise Exception('Impossible to download file')
 
-    def are_all_messages_loaded(self, chat_id):
-        return self.wapi_functions.areAllMessagesLoaded(chat_id)
+        media_key = b64decode(media_msg.media_key)
+        derivative = HKDFv3().deriveSecrets(media_key,
+                                            binascii.unhexlify(media_msg.crypt_keys[media_msg.type]),
+                                            112)
+
+        parts = ByteUtil.split(derivative, 16, 32)
+        iv = parts[0]
+        cipher_key = parts[1]
+        e_file = file_data[:-10]
+
+        cr_obj = Cipher(algorithms.AES(cipher_key), modes.CBC(iv), backend=default_backend())
+        decryptor = cr_obj.decryptor()
+        return BytesIO(decryptor.update(e_file) + decryptor.finalize())
+
+    #################
+    # Groups
+    #################
+    def contact_get_common_groups(self, contact_id):
+        """
+        Returns groups common between a user and the contact with given id.
+
+        :return: Contact or Error
+        :rtype: Contact
+        """
+        for group in self.wapi_functions.getCommonGroups(contact_id):
+            yield factory_chat(group, self)
 
     def group_get_participants_ids(self, group_id):
         return self.wapi_functions.getGroupParticipantIDs(group_id)
@@ -672,136 +758,6 @@ class WhatsAPIDriver(object):
         for admin_id in admin_ids:
             yield self.get_contact_from_id(admin_id)
 
-    def get_profile_pic_from_id(self, id):
-        """
-        Get full profile pic from an id
-        The ID must be on your contact book to
-        successfully get their profile picture.
-
-        :param id: ID
-        :type id: str
-        """
-        profile_pic = self.wapi_functions.getProfilePicFromId(id)
-        if profile_pic:
-            return b64decode(profile_pic)
-        else:
-            return False
-
-    def get_profile_pic_small_from_id(self, id):
-        """
-        Get small profile pic from an id
-        The ID must be on your contact book to
-        successfully get their profile picture.
-
-        :param id: ID
-        :type id: str
-        """
-        profile_pic_small = self.wapi_functions.getProfilePicSmallFromId(id)
-        if profile_pic_small:
-            return b64decode(profile_pic_small)
-        else:
-            return False
-
-    def download_file(self, url):
-        return b64decode(self.wapi_functions.downloadFile(url))
-
-    def download_file_with_credentials(self, url):
-        return b64decode(self.wapi_functions.downloadFileWithCredentials(url))
-
-    def download_media(self, media_msg, force_download=False):
-        if not force_download:
-            try:
-                if media_msg.content:
-                    return BytesIO(b64decode(media_msg.content))
-            except AttributeError:
-                pass
-
-        file_data = self.download_file(media_msg.client_url)
-
-        if not file_data:
-            raise Exception('Impossible to download file')
-
-        media_key = b64decode(media_msg.media_key)
-        derivative = HKDFv3().deriveSecrets(media_key,
-                                            binascii.unhexlify(media_msg.crypt_keys[media_msg.type]),
-                                            112)
-
-        parts = ByteUtil.split(derivative, 16, 32)
-        iv = parts[0]
-        cipher_key = parts[1]
-        e_file = file_data[:-10]
-
-        cr_obj = Cipher(algorithms.AES(cipher_key), modes.CBC(iv), backend=default_backend())
-        decryptor = cr_obj.decryptor()
-        return BytesIO(decryptor.update(e_file) + decryptor.finalize())
-
-    def get_battery_level(self):
-        """
-        Check the battery level of device
-
-        :return: int: Battery level
-        """
-        return self.wapi_functions.getBatteryLevel()
-
-    def leave_group(self, chat_id):
-        """
-        Leave a group
-
-        :param chat_id: id of group
-        :return:
-        """
-        return self.wapi_functions.leaveGroup(chat_id)
-
-    def delete_chat(self, chat_id):
-        """
-        Delete a chat
-
-        :param chat_id: id of chat
-        :return:
-        """
-        return self.wapi_functions.deleteConversation(chat_id)
-
-    def delete_message(self, chat_id, message_array, revoke=False):
-        """
-        Delete a chat
-
-        :param chat_id: id of chat
-        :param message_array: one or more message(s) id
-        :param revoke: Set to true so the message will be deleted for everyone, not only you
-        :return:
-        """
-        return self.wapi_functions.deleteMessage(chat_id, message_array, revoke)
-
-    def check_number_status(self, number_id):
-        """
-        Check if a number is valid/registered in the whatsapp service
-
-        :param number_id: number id
-        :return:
-        """
-        number_status = self.wapi_functions.checkNumberStatus(number_id)
-        return NumberStatus(number_status, self)
-
-    def subscribe_new_messages(self, observer):
-        self.wapi_functions.new_messages_observable.subscribe(observer)
-
-    def unsubscribe_new_messages(self, observer):
-        self.wapi_functions.new_messages_observable.unsubscribe(observer)
-
-    def quit(self):
-        self.wapi_functions.quit()
-        self.driver.quit()
-
-    def create_chat_by_number(self, number):
-        url = self._URL + "/send?phone=" + number
-        self.driver.get(url)
-
-    def contact_block(self, id):
-        return self.wapi_functions.contactBlock(id)
-
-    def contact_unblock(self, id):
-        return self.wapi_functions.contactUnblock(id)
-
     def add_participant_group(self, idGroup, idParticipant):
         return self.wapi_functions.addParticipant(idGroup, idParticipant)
 
@@ -813,3 +769,21 @@ class WhatsAPIDriver(object):
 
     def demote_participant_admin_group(self, idGroup, idParticipant):
         return self.wapi_functions.demoteParticipant(idGroup, idParticipant)
+
+    def leave_group(self, chat_id):
+        """
+        Leave a group
+
+        :param chat_id: id of group
+        :return:
+        """
+        return self.wapi_functions.leaveGroup(chat_id)
+
+    #################
+    # Observer
+    #################
+    def subscribe_new_messages(self, observer):
+        self.wapi_functions.new_messages_observable.subscribe(observer)
+
+    def unsubscribe_new_messages(self, observer):
+        self.wapi_functions.new_messages_observable.unsubscribe(observer)

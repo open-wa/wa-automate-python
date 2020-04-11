@@ -137,8 +137,6 @@ There are issues with asynchronous calls in Chrome. Primary support of this api 
 ### Known issues with chrome:
  - Group Metadata
  
-### For more queries, contact: mukulhase@gmail.com
-
 ## Contribute
 Contributing is simple as cloning, making changes and submitting a pull request.
 If you would like to contribute, here are a few starters:
@@ -146,7 +144,6 @@ If you would like to contribute, here are a few starters:
 - More sorts of examples
 - Additional features/ More integrations (This api has the minimum amount, but I don't mind having more data accessible to users)
 - Create an env/vagrant box to make it easy for others to contribute. (At the moment, all I have is a requirements.txt
-- Phantom JS support
 
 ## Legal
 This code is in no way affiliated with, authorized, maintained, sponsored or endorsed by WhatsApp or any of its affiliates or subsidiaries. This is an independent and unofficial software. Use at your own risk.
