@@ -28,7 +28,7 @@ It is based on the official Whatsapp Web Browser Application and uses Selenium b
 | [Send Images (image)](#sending-mediafiles)               |             | ✅          |
 | [Send media (audio, doc)](#sending-mediafiles)  |             | ✅          |
 | [Send media (video)](#sending-video)  |             | ✅          |
-| Send stickers                     |             |❌           |
+| Send stickers                     |             |✅           |
 | [Decrypt media (image, audio, doc)](#decrypting-media) |             | ❌          |
 | [Capturing QR Code](#capturing-qr-code)                 |             | ✅          |
 | [Multiple Sessions](#managing-multiple-sessions-at-once)                 |             | ❌          |

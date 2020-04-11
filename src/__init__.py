@@ -5,6 +5,7 @@ wa-automate-python module
 """
 
 import binascii
+import io
 import logging
 import os
 import shutil
@@ -13,6 +14,7 @@ from base64 import b64decode
 from io import BytesIO
 from json import dumps, loads
 
+from PIL import Image
 from axolotl.kdf.hkdfv3 import HKDFv3
 from axolotl.util.byteutil import ByteUtil
 from cryptography.hazmat.backends import default_backend
@@ -664,9 +666,25 @@ class WhatsAPIDriver(object):
             return factory_message(result, self)
         return result
 
+    def send_image_as_sticker(self, path, chatid):
+        """
+        Converts the file to base64 and sends it using the sendImage function of wapi.js
+        :param path: file path
+        :param chatid: chatId to be sent
+        :param caption:
+        :return:
+        """
+        img = Image.open(path)
+        img.thumbnail((512, 512))
+        webp_img = io.BytesIO()
+        img.save(webp_img, 'webp')
+        webp_img.seek(0)
+        imgBase64 = convert_to_base64(webp_img, is_thumbnail=True)
+        return self.wapi_functions.sendImageAsSticker(imgBase64, chatid, {})
+
     def send_media(self, path, chatid, caption):
         """
-            converts the file to base64 and sends it using the sendImage function of wapi.js
+        Converts the file to base64 and sends it using the sendImage function of wapi.js
         :param path: file path
         :param chatid: chatId to be sent
         :param caption:
