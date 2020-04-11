@@ -13,6 +13,36 @@
 This package is used to provide a python interface for interacting with WhatsAPP Web to send and receive Whatsapp messages.
 It is based on the official Whatsapp Web Browser Application and uses Selenium browser automation to communicate with Whatsapp Web.
 
+### Functions list
+| Function                          | Description | Implemented |
+| --------------------------------- | ----------- | ----------- |
+| Receive message                   |             | ✅          |
+| Automatic QR Refresh              |             | ❌          |
+| Send text                         |             | ✅          |
+| Get contacts                      |             | ✅          |
+| Get chats                         |             | ✅          |
+| Get groups                        |             | ✅          |
+| Get group members                 |             | ✅          |
+| Send contact                      |             | ❌          |
+| Get contact detail                |             | ❌          |
+| [Send Images (image)](#sending-mediafiles)               |             | ✅          |
+| [Send media (audio, doc)](#sending-mediafiles)  |             | ✅          |
+| [Send media (video)](#sending-video)  |             | ✅          |
+| Send stickers                     |             |❌           |
+| [Decrypt media (image, audio, doc)](#decrypting-media) |             | ❌          |
+| [Capturing QR Code](#capturing-qr-code)                 |             | ✅          |
+| [Multiple Sessions](#managing-multiple-sessions-at-once)                 |             | ❌          |
+| [Last seen & isOnline (beta)]      |             | ❌          |
+| [📍 SEND LOCATION!! (beta)](#sending-location)         |             | ❌          |
+| [Simulated '...typing'](#simulate-typing)             |             | ❌          |
+| [Send GIFs!](#sending-gifs)                       |             | ❌          |
+| [Forward Messages](#sending-gifs)                  |             | ❌          |
+| [Listen to Read Receipts](#listen-to-read-receipts)           |             | ❌          |
+| [Listen to Live Locations](#listen-to-live-locations)           |             | ❌          |
+| [Group participant changes](#group-participant-changes)         |             | ❌          |
+| [Create Groups](#create-group)         |             | ✅          |
+| [add, remove, promote, demote participants](##group-participants-beta)         |             | ✅          |
+
 ## Local installation
 
 ##### Dependencies
