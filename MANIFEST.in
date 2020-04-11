@@ -1,1 +1,1 @@
-recursive-include webwhatsapi *
+recursive-include src *

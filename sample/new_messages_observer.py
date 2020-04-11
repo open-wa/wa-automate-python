@@ -2,7 +2,7 @@ import os
 import sys
 import time
 
-from webwhatsapi import WhatsAPIDriver
+from src import WhatsAPIDriver
 
 
 def run():

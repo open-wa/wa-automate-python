@@ -1,5 +1,5 @@
-from webwhatsapi import WhatsAPIDriver
-from webwhatsapi.objects.message import Message
+from src import WhatsAPIDriver
+from src.objects.message import Message
 
 driver = WhatsAPIDriver(loadstyles=False)
 print("Waiting for QR")

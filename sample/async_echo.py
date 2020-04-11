@@ -1,8 +1,8 @@
 from asyncio import Task, ensure_future, get_event_loop, sleep, wait
 from signal import SIGINT
 
-from webwhatsapi.async_driver import WhatsAPIDriverAsync
-from webwhatsapi.objects.message import Message
+from src.async_driver import WhatsAPIDriverAsync
+from src.objects.message import Message
 
 loop = get_event_loop()
 

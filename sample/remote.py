@@ -1,6 +1,6 @@
 import os, sys, time, json
-from webwhatsapi import WhatsAPIDriver
-from webwhatsapi.objects.message import Message, MediaMessage
+from src import WhatsAPIDriver
+from src.objects.message import Message, MediaMessage
 
 print "Environment", os.environ
 try:
