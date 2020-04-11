@@ -44,28 +44,27 @@ Using Docker may also help in developing the library itself.
 This is based on the official Selenium image (https://github.com/SeleniumHQ/docker-selenium).
 The following Docker command runs a Selenium standalone Firefox browser in debug (VNC) mode. You can use VNC on port 5900 to view the browser. It uses the network "selenium" and the container is named "firefox" for later reference.
 
-    docker run -d -p 4444:4444 -p 5900:5900 --name firefox --network selenium -v /dev/shm:/dev/shm selenium/standalone-firefox-debug:3.14.0-curium
+    docker run -d -p 4444:4444 -p 5900:5900 --name firefox --network selenium -v /dev/shm:/dev/shm selenium/standalone-firefox-debug:3.141.59
 
-### 3. Build python/webwhatsapi docker base image
+### 3. Build python/wa-automate-python docker base image
 
 The following command uses the dockerfile to build a new image based on Python 2.7 with all required packages from requirements.txt. 
 
-    docker build -t webwhatsapi .
+    docker build -t wa-automate-python .
 
 ### 4. Run client container
 
 Now to the client container. The following command installs a local webwhatsapi inside the base container and runs a client. It maps the local directory to the app directory inside the container for easy development. Also sets the network to "selenium" and an environment variable for the remote selenium url. Please note that the remote Selenium hostname must be identical to the name of the Selenium container. 
 
-    docker run --network selenium -it -e SELENIUM='http://firefox:4444/wd/hub' -v $(pwd):/app  webwhatsapi /bin/bash -c "pip install ./;pip list;python sample/remote.py"
-    
+    docker run --network selenium -it -e SELENIUM='http://firefox:4444/wd/hub' -v $(pwd):/app  wa-automate-python /bin/bash -c "pip install ./;pip list;python sample/remote.py"
     
 For Windows (cmd):
 
-    docker run --network selenium -it -e SELENIUM='http://firefox:4444/wd/hub' -v "%cd%:/app" webwhatsapi /bin/bash -c "pip install ./;pip list;python sample/remote.py"
+    docker run --network selenium -it -e SELENIUM='http://firefox:4444/wd/hub' -v "%cd%:/app" wa-automate-python /bin/bash -c "pip install ./;pip list;python sample/remote.py"
 
 For Windows (PowerShell):
 
-    docker run --network selenium -it -e SELENIUM='http://firefox:4444/wd/hub' -v "$(pwd):/app".ToLower() webwhatsapi /bin/bash -c "pip install ./;pip list;python sample/remote.py"
+    docker run --network selenium -it -e SELENIUM='http://firefox:4444/wd/hub' -v "$(pwd):/app".ToLower() wa-automate-python /bin/bash -c "pip install ./;pip list;python sample/remote.py"
 
 It is also certainly possible to fully build the docker image in advance and define an entrypoint/cmd inside the dockerfile to run a full client.
 
