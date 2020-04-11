@@ -45,8 +45,8 @@ from functools import wraps
 from logging.handlers import TimedRotatingFileHandler
 from selenium.common.exceptions import WebDriverException
 from werkzeug.utils import secure_filename
-from webwhatsapi import MessageGroup, WhatsAPIDriver, WhatsAPIDriverStatus
-from webwhatsapi.objects.whatsapp_object import WhatsappObject
+from src import MessageGroup, WhatsAPIDriver, WhatsAPIDriverStatus
+from src.objects.whatsapp_object import WhatsappObject
 
 '''
 ###########################

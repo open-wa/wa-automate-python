@@ -1,9 +1,13 @@
-<img alt="Logo" src="https://github.com/Tobaloidee/WebWhatsapp-Wrapper/blob/master/docs/logo/logotype-a-04.png">
+<div align="center">
+<img src="https://raw.githubusercontent.com/open-wa/wa-automate-nodejs/master/resources/hotfix-logo.png" width="128" height="128"/>
+
+# wa-automate-python
 
 ## (Based on web.whatsapp.com)
+<a href="https://discord.gg/dnpp72a"><img src="https://img.shields.io/discord/661438166758195211?color=blueviolet&label=discord&style=flat" /></a>
 [![PyPI version](https://badge.fury.io/py/webwhatsapi.svg)](https://badge.fury.io/py/webwhatsapi)
-[![Firefox version](https://img.shields.io/badge/Firefox-58.0.2-green.svg)]()
-[![All Contributors](https://img.shields.io/badge/all_contributors-0-orange.svg?style=flat-square)](#contributors)
+[![Firefox version](https://img.shields.io/badge/Firefox-75.0-green.svg)]()
+</div>
 
 ## What is it?
 This package is used to provide a python interface for interacting with WhatsAPP Web to send and receive Whatsapp messages.
@@ -28,7 +32,7 @@ You will need to install [Gecko Driver](https://github.com/mozilla/geckodriver) 
 
 ## Docker and remote Selenium Installation
 
-It may be favorable to run Selenium and the webwhatsapi client as Docker containers. This almost completely avoids any installation problems and any messy local installation or dependency hell. The result is a more stable runtime environment for the client, which could run on a headless server.
+It may be favorable to run Selenium and the wa-automate-python client as Docker containers. This almost completely avoids any installation problems and any messy local installation or dependency hell. The result is a more stable runtime environment for the client, which could run on a headless server.
 Using Docker may also help in developing the library itself.
 
 ### 1. Create network
@@ -147,6 +151,9 @@ If you would like to contribute, here are a few starters:
 
 ## Legal
 This code is in no way affiliated with, authorized, maintained, sponsored or endorsed by WhatsApp or any of its affiliates or subsidiaries. This is an independent and unofficial software. Use at your own risk.
+
+## License
+[Hippocratic + Do Not Harm Version 1.0](https://github.com/open-wa/wa-automate-python/blob/master/LICENSE.md)
 
 ## Contributors
 

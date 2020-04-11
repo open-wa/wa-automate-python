@@ -1,5 +1,5 @@
 """
-WebWhatsAPI module
+wa-automate-python module
 
 .. moduleauthor:: Mukul Hase <mukulhase@gmail.com>, Adarsh Sanjeev <adarshsanjeev@gmail.com>
 """

@@ -1,6 +1,6 @@
 import os, sys, time, json, datetime
-from webwhatsapi import WhatsAPIDriver
-from webwhatsapi.objects.message import Message, MediaMessage
+from src import WhatsAPIDriver
+from src.objects.message import Message, MediaMessage
 
 # EXAMPLE OF LOGGER BOT
 # =====================
