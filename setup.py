@@ -13,7 +13,7 @@ import os
 # Always prefer setuptools over distutils
 from setuptools import setup
 
-PACKAGE_NAME = 'webwhatsapi'
+PACKAGE_NAME = 'src'
 
 path = os.path.join(os.path.dirname(__file__), PACKAGE_NAME, '__init__.py')
 
@@ -42,10 +42,6 @@ with open(path, 'r') as file:
             version = '.'.join(r)
             break
 
-# Get the long description from the README file
-with open(os.path.join(os.path.dirname(__file__), 'README.rst'), encoding='utf-8') as f:
-    long_description = f.read()
-
 setup(
     name='webwhatsapi',
 
@@ -55,11 +51,6 @@ setup(
     version=version,
 
     description='A python interface for Whatsapp Web',
-    long_description=long_description,
-
-    # The project's main homepage.
-    url='https://github.com/mukulhase/WhatsAPI',
-    download_url='https://github.com/mukulhase/WhatsAPI/archive/{}.tar.gz'.format(version),
 
     # Author details
     author='Mukul Hase',
