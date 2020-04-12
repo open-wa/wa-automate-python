@@ -5,7 +5,6 @@
 
 ## (Based on web.whatsapp.com)
 <a href="https://discord.gg/dnpp72a"><img src="https://img.shields.io/discord/661438166758195211?color=blueviolet&label=discord&style=flat" /></a>
-[![PyPI version](https://badge.fury.io/py/webwhatsapi.svg)](https://badge.fury.io/py/webwhatsapi)
 [![Firefox version](https://img.shields.io/badge/Firefox-75.0-green.svg)]()
 </div>
 
@@ -25,24 +24,24 @@ It is based on the official Whatsapp Web Browser Application and uses Selenium b
 | Get group members                 |             | ✅          |
 | Send contact                      |             | ✅          |
 | Get contact detail                |             | ✅          |
-| [Send Images (image)](#sending-mediafiles)               |             | ✅          |
-| [Send media (audio, doc)](#sending-mediafiles)  |             | ✅          |
-| [Send media (video)](#sending-video)  |             | ✅          |
+| Send Images (image)               |             | ✅          |
+| Send media (audio, doc)  |             | ✅          |
+| Send media (video)  |             | ✅          |
 | Send stickers                     |             |✅           |
-| [Decrypt media (image, audio, doc)](#decrypting-media) |             | ✅          |
-| [Capturing QR Code](#capturing-qr-code)                 |             | ✅          |
-| [Multiple Sessions](#managing-multiple-sessions-at-once)                 |             | ✅          |
-| [Last seen & isOnline (beta)]      |             | ✅          |
-| [📍 SEND LOCATION!! (beta)](#sending-location)         |             | ✅          |
-| [Simulated '...typing'](#simulate-typing)             |             | ✅          |
-| [Send GIFs!](#sending-gifs)                       |             | ✅          |
-| [Forward Messages](#sending-gifs)                  |             | ✅          |
-| [Listen to New Messages](#listen-to-read-receipts)           |             | ✅          |
-| [Listen to Read Receipts](#listen-to-read-receipts)           |             | ✅          |
-| [Listen to Live Locations](#listen-to-live-locations)           |             | ✅          |
-| [Group participant changes](#group-participant-changes)         |             | ❌          |
-| [Create Groups](#create-group)         |             | ✅          |
-| [add, remove, promote, demote participants](##group-participants-beta)         |             | ✅          |
+| Decrypt media (image, audio, doc) |             | ✅          |
+| Capturing QR Code                 |             | ✅          |
+| Multiple Sessions                 |             | ✅          |
+| Last seen & isOnline (beta)      |             | ✅          |
+| 📍 SEND LOCATION!! (beta)         |             | ✅          |
+| Simulated '...typing'             |             | ✅          |
+| Send GIFs!                       |             | ✅          |
+| Forward Messages                  |             | ✅          |
+| Listen to New Messages           |             | ✅          |
+| Listen to Read Receipts           |             | ✅          |
+| Listen to Live Locations           |             | ✅          |
+| Group participant changes         |             | ❌          |
+| Create Groups         |             | ✅          |
+| add, remove, promote, demote participants         |             | ✅          |
 
 ## Local installation
 
@@ -60,6 +59,142 @@ You will need to install [Gecko Driver](https://github.com/mozilla/geckodriver) 
 #### From pipenv
 - Install from pipenv
 `pipenv install`
+
+## Usage
+
+### 1. Import library
+
+    from webwhatsapi import WhatsAPIDriver
+
+### 2. Instantiate driver 
+
+    driver = WhatsAPIDriver()
+
+Possible arguments for constructor:
+
+- client : Type of browser. The default is Firefox, but Chrome and Remote is supported too. See sample directory for remote examples.
+- username : Can be any value.
+- proxy: The proxy server to configure selenium to. Format is "<proxy>:<portnumber>"
+- command_executor: Passed directly as an argument to Remote Selenium. Ignore if not using it. See sample directory for remote examples. 
+- loadstyles: Default is False. If True, it will load the styling in the browser.
+- profile: Pass the full path to the profile to load it. Profile folder will be end in ".default". For persistent login, open a normal firefox tab, log in to whatsapp, then pass the profile as an argument.
+
+### 3. Wait until you are loged in, or you are asked to scan the QR
+
+    driver.wait_for_login()
+    
+### 4. Get the QR in one of these ways
+
+    # Save image to file
+    driver.get_qr()
+    
+    # Get image in base64 
+    driver.get_qr_base64()
+
+The QR code is automatically reloaded if it has expired
+    
+### 5. Scan the QR code with your phone
+Once you scan the QR obtained, you are ready to use the rest of the funcionality 
+
+### Viewing unread messages
+
+    unread_messages = driver.view_unread()
+
+### Forwarding messages
+You need to pass the following params:
+
+- chat id to forward messages to
+- messages: a single or array of message ids
+- skipMyMessages: true or false, if true it will filter out messages sent by you from the list of messages, default false.
+
+
+    driver.forward_messages(to_chat_id, messages, False)
+
+### Reply messages
+
+    <Message Object>.reply_message('I like that option!')
+
+### List all chats
+
+    driver.get_all_chats()
+
+### Get chat by name
+Fetches a chat given its name. Must be an exact match
+
+    driver.get_chat_from_name(chat_name)
+
+### Get chat by number
+Fetches a chat given its phone number. Must be in the international format.\
+For example, for the number: +123-45-678-9123, this function expects: 123456789123
+
+    driver.get_chat_from_phone_number('123456789123')
+
+### To send a message, get a Chat object from before, and call the send_message function with the message.
+
+    <Chat Object>.send_message("Hello")
+
+### Sending Media/Files
+
+    <Chat Object>.send_media(image_path, "look at this!")
+
+### Sending Gifs
+
+There are two ways to send GIFs - by Video or by giphy link.
+
+##### 1.  Sending Video as a GIF.     
+WhatsApp doesn't actually support the .gif format - probably due to how inefficient it is as a filetype - they instead convert GIFs to video then process them.
+
+In order to send gifs you need to convert the gif to an mp4 file then use the following method:
+
+    <Chat Object>.send_video_as_gif(mp4_file_path, "look at this gif!")
+##### 2. Sending a Giphy Media Link
+This is a convenience method to make it easier to send gifs from the website [GIPHY](https://giphy.com). You need to make sure you use a giphy media link as shown below.
+
+    <Chat Object>.send_video_as_gif("https://media.giphy.com/media/oYtVHSxngR3lC/giphy.gif", "look at this giphy!")
+
+### Sending Location
+You need to pass the following params:
+
+- latitude: '51.5074'
+- longitude: '0.1278'
+- location text: 'LONDON!'
+
+
+    <Chat Object>.send_location('51.5074', '0.1278',  'London')
+
+### Simulate typing
+You need to pass the following param:
+
+- typing: `True` or `False`
+
+
+    <Chat Object>.set_typing_simulation(True)
+
+### Create group
+The first parameter is the group name, the second parameter is the contact ids to add as participants
+
+    driver.create_group('The Groopers', [chat_id1, chat_id2])
+
+### Edit group participants
+You can get the GroupChat object with the previously explained methods to obtain chats. 
+
+    <GroupChat Object>.add_participant_group(id_participant)
+    <GroupChat Object>.remove_participant_group(id_participant)
+    <GroupChat Object>.promove_participant_admin_group(id_participant)
+    <GroupChat Object>.demote_participant_admin_group(id_participant)
+
+### Listening for new messages
+For this we must define a new observer class that implements the `on_message_received` method and receives the new messages. 
+    
+    class NewMessageObserver:
+        def on_message_received(self, new_messages):
+            for message in new_messages:
+                print("New message received from number {}".format(message.sender.id))
+    
+    driver.subscribe_new_messages(NewMessageObserver())
+
+## Limitation
+Phone needs to manually scan the QR Code from Whatsapp Web. Phone has to be on and connected to the internet.
 
 ## Docker and remote Selenium Installation
 
@@ -99,71 +234,6 @@ For Windows (PowerShell):
 
 It is also certainly possible to fully build the docker image in advance and define an entrypoint/cmd inside the dockerfile to run a full client.
 
-## Usage
-
-See sample directory for more complex usage examples.
-
-### 1. Import library
-
-    from webwhatsapi import WhatsAPIDriver
-
-### 2. Instantiate driver and set username
-
-    driver = WhatsAPIDriver(username="mkhase")
-
-Possible arguments for constructor:
-
-- client : Type of browser. The default is Firefox, but Chrome and Remote is supported too. See sample directory for remote examples.
-- username : Can be any value.
-- proxy: The proxy server to configure selenium to. Format is "<proxy>:<portnumber>"
-- command_executor: Passed directly as an argument to Remote Selenium. Ignore if not using it. See sample directory for remote examples. 
-- loadstyles: Default is False. If True, it will load the styling in the browser.
-- profile: Pass the full path to the profile to load it. Profile folder will be end in ".default". For persistent login, open a normal firefox tab, log in to whatsapp, then pass the profile as an argument.
-
-### 3. Use a function to save the QR code in a file, for remote clients, so that you can access them easily. Scan the QR code either from the file, or directly from the client to log in.
-
-    driver.get_qr()
-
-### 4. In case the QR code expires, you can use the reload_qr function to reload it
-
-    driver.reload_qr()
-
-### 5. Viewing unread messages
-
-    driver.view_unread()
-
-### 6. Viewing all contacts
-
-    driver.get_all_chats()
-
-### 7. To send a message, get a Contact object, and call the send_message function with the message.
-
-    <Contact Object>.send_message("Hello")
-
-### 8. Sending a message to an ID, whether a contact or not.
-
-    driver.send_message_to_id(id, message)
-
-## Code Documentation
-https://webwhatsapi.readthedocs.io/en/latest/
-
-## Limitation
-Phone needs to manually scan the QR Code from Whatsapp Web. Phone has to be on and connected to the internet.
-
-# Capabilities
- - Read recent messages
- - Get unread messages
- - Send text messages
- - Get List of Contacts
- - Get List of Groups
- - Get information about Groups
- - Get various events. For example: Leaving, Joining, Missed Call etc.
- - Download media messages
- - Get List of common groups
- - Asyncio driver version
-
-## Note
-There are issues with asynchronous calls in Chrome. Primary support of this api is for firefox. If something doesn't work in chrome, please try firefox.
 
 ## Contribute
 Contributing is simple as cloning, making changes and submitting a pull request.

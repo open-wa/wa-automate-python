@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Union
 
 from .contact import Contact
-from .whatsapp_object import WhatsappObject
+from .whatsapp_object import WhatsappObject, driver_needed
 from ..helper import safe_str
 
 
@@ -72,6 +72,11 @@ class Message(WhatsappObject):
             sender=safe_str(self.sender.get_safe_name()),
             timestamp=self.timestamp,
             content=self.safe_content)
+
+    @driver_needed
+    def reply_message(self, message):
+        return self.driver.reply_message(self.id, message)
+
 
 
 class MediaMessage(Message):

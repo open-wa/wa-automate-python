@@ -687,14 +687,14 @@ class WhatsAPIDriver(object):
             return factory_message(result, self)
         return result
 
-    def chat_reply_message(self, message_id, message):
+    def reply_message(self, message_id, message):
         result = self.wapi_functions.ReplyMessage(message_id, message)
 
         if not isinstance(result, bool):
             return factory_message(result, self)
         return result
 
-    def chat_forward_messages(self, chat_id_to, message_ids, skip_my_messages=False):
+    def forward_messages(self, chat_id_to, message_ids, skip_my_messages=False):
         return self.wapi_functions.forwardMessages(chat_id_to, message_ids, skip_my_messages)
 
     def send_image_as_sticker(self, path, chatid):
@@ -817,6 +817,9 @@ class WhatsAPIDriver(object):
         """
         for group in self.wapi_functions.getCommonGroups(contact_id):
             yield factory_chat(group, self)
+
+    def create_group(self, name, chat_ids):
+        return self.wapi_functions.createGroup(name, chat_ids)
 
     def group_get_participants_ids(self, group_id):
         return self.wapi_functions.getGroupParticipantIDs(group_id)
