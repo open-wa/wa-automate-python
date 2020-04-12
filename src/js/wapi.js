@@ -81,7 +81,7 @@ if (!window.Store || !window.Store.Msg) {
         {id: "MyStatus", conditions: (module) => (module.getStatus && module.setMyStatus) ? module : null},
         {
           id: "ChatStates",
-          conditions: (module) => (module.sendChatStatePaused && module.sendChatStateRecording && module.sendChatStateComposing) ? module : null
+          conditions: (module) => (module.sendChatStatePaused && module.sendChatStateRecording && module.sendChatStateComposing && module.subscribePresence) ? module : null
         },
         {id: "GroupActions", conditions: (module) => (module.sendExitGroup && module.localExitGroup) ? module : null},
         {id: "Features", conditions: (module) => (module.FEATURE_CHANGE_EVENT && module.features) ? module : null},
@@ -207,8 +207,8 @@ window.WAPI._serializeChatObj = (obj) => {
     groupMetadata: obj["groupMetadata"] ? window.WAPI._serializeRawObj(obj["groupMetadata"]) : null,
     presence: obj["presence"] ? window.WAPI._serializeRawObj(obj["presence"]) : null,
     msgs: null,
-    isOnline: obj.__x_presence.attributes.isOnline || null,
-    lastSeen: (obj && obj.previewMessage && obj.previewMessage.__x_ephemeralStartTimestamp) ? obj.previewMessage.__x_ephemeralStartTimestamp * 1000 : null
+    isOnline: obj.presence.attributes.isOnline || null,
+    lastSeen: obj.presence.attributes.chatstate.t
   });
 };
 
@@ -817,8 +817,24 @@ window.WAPI.isConnected = function (done) {
 };
 
 //I dont think this will work for group chats.
-window.WAPI.isChatOnline = async function (id) {
-  return await Store.Chat.get(id).presence.subscribe().then(_ => Store.Chat.get(id).presence.attributes.isOnline);
+window.WAPI.isChatOnline = async function (id, done) {
+  let online = await Store.Chat.get(id).presence.subscribe().then(_ => Store.Chat.get(id).presence.attributes.isOnline);
+  done(online);
+}
+
+window.WAPI.getLastSeen = async function (id, done) {
+  let lastSeen = await new Promise(function (resolve, reject) {
+    let presence = Store.Chat.get(id).presence;
+    if (presence.chatstate.t) {
+      resolve(presence.chatstate.t)
+    } else {
+      presence.on('change:chatstate.type', (data) => {
+        resolve(data.t)
+      });
+      presence.subscribe()
+    }
+  });
+  done(lastSeen);
 }
 
 window.WAPI.processMessageObj = function (messageObj, includeMe, includeNotifications) {
@@ -1055,9 +1071,10 @@ function isChatMessage(message) {
   return true;
 }
 
-window.WAPI.setPresence = function (available) {
+window.WAPI.setPresence = function (available, done) {
   if (available) Store.Presence.setPresenceAvailable();
   else Store.Presence.setPresenceUnavailable();
+  done();
 }
 window.WAPI.getUnreadMessages = function (includeMe, includeNotifications, use_unread_count, done) {
   debugger

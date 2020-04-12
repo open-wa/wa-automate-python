@@ -331,6 +331,12 @@ class WhatsAPIDriver(object):
         """
         return self.wapi_functions.getBatteryLevel()
 
+    def set_presence(self, present):
+        """
+        Set presence to 'online' or not
+        """
+        return self.wapi_functions.setPresence(present)
+
     #################
     # QR
     #################
@@ -541,6 +547,12 @@ class WhatsAPIDriver(object):
 
     def contact_unblock(self, id):
         return self.wapi_functions.contactUnblock(id)
+
+    def is_chat_online(self, chat_id):
+        return self.wapi_functions.isChatOnline(chat_id)
+
+    def get_chat_last_seen(self, chat_id):
+        return self.wapi_functions.getLastSeen(chat_id)
 
     def delete_chat(self, chat_id):
         """

@@ -21,6 +21,9 @@ class Chat(WhatsappObjectWithId):
 
     def __init__(self, js_obj, driver=None):
         super(Chat, self).__init__(js_obj, driver)
+        self.last_seen = None
+        if 'lastSeen' in js_obj:
+            self.last_seen = js_obj["lastSeen"]
 
     @driver_needed
     def send_media(self, image_path, caption=None):

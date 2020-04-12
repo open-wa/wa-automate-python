@@ -32,7 +32,7 @@ It is based on the official Whatsapp Web Browser Application and uses Selenium b
 | [Decrypt media (image, audio, doc)](#decrypting-media) |             | ✅          |
 | [Capturing QR Code](#capturing-qr-code)                 |             | ✅          |
 | [Multiple Sessions](#managing-multiple-sessions-at-once)                 |             | ✅          |
-| [Last seen & isOnline (beta)]      |             | ❌          |
+| [Last seen & isOnline (beta)]      |             | ✅          |
 | [📍 SEND LOCATION!! (beta)](#sending-location)         |             | ❌          |
 | [Simulated '...typing'](#simulate-typing)             |             | ✅          |
 | [Send GIFs!](#sending-gifs)                       |             | ✅          |
