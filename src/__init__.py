@@ -861,7 +861,19 @@ class WhatsAPIDriver(object):
     # Observer
     #################
     def subscribe_new_messages(self, observer):
-        self.wapi_functions.new_messages_observable.subscribe(observer)
+        self.wapi_functions.new_messages_observable.subscribe_new_messages(observer)
+
+    def subscribe_acks(self, observer):
+        self.wapi_functions.new_messages_observable.subscribe_acks(observer)
+
+    def subscribe_live_location_updates(self, observer, chat_id):
+        self.wapi_functions.new_messages_observable.subscribe_live_location_updates(observer, chat_id)
 
     def unsubscribe_new_messages(self, observer):
-        self.wapi_functions.new_messages_observable.unsubscribe(observer)
+        self.wapi_functions.new_messages_observable.unsubscribe_new_messages(observer)
+
+    def unsubscribe_acks(self, observer):
+        self.wapi_functions.new_messages_observable.unsubscribe_acks(observer)
+
+    def unsubscribe_live_location_updates(self, observer, chat_id):
+        self.wapi_functions.new_messages_observable.unsubscribe_live_location_updates(observer, chat_id)

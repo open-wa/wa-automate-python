@@ -39,7 +39,7 @@ It is based on the official Whatsapp Web Browser Application and uses Selenium b
 | [Forward Messages](#sending-gifs)                  |             | ✅          |
 | [Listen to New Messages](#listen-to-read-receipts)           |             | ✅          |
 | [Listen to Read Receipts](#listen-to-read-receipts)           |             | ✅          |
-| [Listen to Live Locations](#listen-to-live-locations)           |             | ❌          |
+| [Listen to Live Locations](#listen-to-live-locations)           |             | ✅          |
 | [Group participant changes](#group-participant-changes)         |             | ❌          |
 | [Create Groups](#create-group)         |             | ✅          |
 | [add, remove, promote, demote participants](##group-participants-beta)         |             | ✅          |
@@ -165,9 +165,6 @@ Phone needs to manually scan the QR Code from Whatsapp Web. Phone has to be on a
 ## Note
 There are issues with asynchronous calls in Chrome. Primary support of this api is for firefox. If something doesn't work in chrome, please try firefox.
 
-### Known issues with chrome:
- - Group Metadata
- 
 ## Contribute
 Contributing is simple as cloning, making changes and submitting a pull request.
 If you would like to contribute, here are a few starters:
@@ -181,13 +178,3 @@ This code is in no way affiliated with, authorized, maintained, sponsored or end
 
 ## License
 [Hippocratic + Do Not Harm Version 1.0](https://github.com/open-wa/wa-automate-python/blob/master/LICENSE.md)
-
-## Contributors
-
-Thanks goes to these wonderful people ([emoji key](https://github.com/kentcdodds/all-contributors#emoji-key)):
-
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore -->
-<!-- ALL-CONTRIBUTORS-LIST:END -->
-
-This project follows the [all-contributors](https://github.com/kentcdodds/all-contributors) specification. Contributions of any kind welcome!
