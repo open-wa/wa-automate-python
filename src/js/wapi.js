@@ -1918,7 +1918,7 @@ window.WAPI.sendContact = function (to, contact) {
  * @param {string|array[Message | string]} messages this can be any mixture of message ids or message objects
  * @param {boolean} skipMyMessages This indicates whether or not to skip your own messages from the array
  */
-window.WAPI.forwardMessages = async function (to, messages, skipMyMessages) {
+window.WAPI.forwardMessages = async function (to, messages, skipMyMessages, done) {
   if (!Array.isArray(messages)) {
     messages = [messages];
   }
@@ -1933,7 +1933,8 @@ window.WAPI.forwardMessages = async function (to, messages, skipMyMessages) {
 
   // let userId = new window.Store.UserConstructor(to);
   let conversation = window.Store.Chat.get(to);
-  return await conversation.forwardMessages(finalForwardMessages)
+  await conversation.forwardMessages(finalForwardMessages);
+  done();
 };
 
 /**
