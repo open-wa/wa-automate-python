@@ -734,6 +734,9 @@ class WhatsAPIDriver(object):
     def send_contact(self, chat_id, contact_ids):
         return self.wapi_functions.sendContact(chat_id, contact_ids)
 
+    def send_location(self, chat_id, lat, long, text):
+        return self.wapi_functions.sendLocation(chat_id, lat, long, text)
+
     def send_message_with_thumbnail(self, path, chatid, url, title, description):
         """
             converts the file to base64 and sends it using the sendImage function of wapi.js

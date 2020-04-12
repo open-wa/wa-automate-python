@@ -2015,7 +2015,7 @@ window.WAPI.simulateTyping = function (chatId, on, done) {
  * @param {string} lng longitude
  * @param {string} loc Text to go with the location message
  */
-window.WAPI.sendLocation = async function (chatId, lat, lng, loc) {
+window.WAPI.sendLocation = async function (chatId, lat, lng, loc, done) {
   var chat = Store.Chat.get(chatId);
   var tempMsg = Object.create(Store.Msg.models.filter(msg => msg.__x_isSentByMe && !msg.quotedMsg)[0]);
   var newId = window.WAPI.getNewMessageId(chatId);
@@ -2048,7 +2048,8 @@ window.WAPI.sendLocation = async function (chatId, lat, lng, loc) {
     isQuotedMsgAvailable: false
   };
   Object.assign(tempMsg, extend);
-  return await Promise.all(Store.addAndSendMsgToChat(chat, tempMsg))
+  await Promise.all(Store.addAndSendMsgToChat(chat, tempMsg));
+  done()
 };
 
 /**
