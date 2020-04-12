@@ -23,8 +23,8 @@ It is based on the official Whatsapp Web Browser Application and uses Selenium b
 | Get chats                         |             | ✅          |
 | Get groups                        |             | ✅          |
 | Get group members                 |             | ✅          |
-| Send contact                      |             | ❌          |
-| Get contact detail                |             | ❌          |
+| Send contact                      |             | ✅          |
+| Get contact detail                |             | ✅          |
 | [Send Images (image)](#sending-mediafiles)               |             | ✅          |
 | [Send media (audio, doc)](#sending-mediafiles)  |             | ✅          |
 | [Send media (video)](#sending-video)  |             | ✅          |

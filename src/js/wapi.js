@@ -1895,7 +1895,7 @@ window.WAPI.base64ImageToFile = function (b64Data, filename) {
  * @param {string} to '000000000000@c.us'
  * @param {string|array} contact '111111111111@c.us' | ['222222222222@c.us', '333333333333@c.us, ... 'nnnnnnnnnnnn@c.us']
  */
-window.WAPI.sendContact = function (to, contact) {
+window.WAPI.sendContact = function (to, contact, done) {
   if (!Array.isArray(contact)) {
     contact = [contact];
   }
@@ -1908,6 +1908,7 @@ window.WAPI.sendContact = function (to, contact) {
   } else if (contact.length === 1) {
     window.WAPI.getChat(to).sendContact(contact[0]);
   }
+  done()
 };
 
 
