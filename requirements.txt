@@ -4,7 +4,6 @@ six>=1.10.0
 python-axolotl
 cryptography
 typing
-numpy
 python-magic
 Pillow
 requests

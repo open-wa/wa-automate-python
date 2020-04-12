@@ -1405,12 +1405,19 @@ window.WAPI.checkNumberStatus = async function (id, done) {
  */
 window.WAPI._newMessagesQueue = [];
 window.WAPI._newMessagesBuffer = (sessionStorage.getItem('saved_msgs') != null) ? JSON.parse(sessionStorage.getItem('saved_msgs')) : [];
+window.WAPI._newAcksBuffer = (sessionStorage.getItem('saved_acks') != null) ? JSON.parse(sessionStorage.getItem('saved_acks')) : [];
 window.WAPI._newMessagesDebouncer = null;
 window.WAPI._newMessagesCallbacks = [];
 
 window.Store.Msg.off('add');
 sessionStorage.removeItem('saved_msgs');
 
+window.WAPI._newAcksListener = Store.Msg.on("change:ack", msg => {
+  let message = window.WAPI.processMessageObj(msg, true, false);
+  if (message) {
+    window.WAPI._newAcksBuffer.push(message)
+  }
+});
 window.WAPI._newMessagesListener = window.Store.Msg.on('add', (newMessage) => {
   if (newMessage && newMessage.isNewMsg && !newMessage.isSentByMe) {
     let message = window.WAPI.processMessageObj(newMessage, false, false);
@@ -1652,6 +1659,20 @@ window.WAPI.getBufferedNewMessages = function (done) {
   }
   return bufferedMessages;
 };
+
+/**
+ * Reads buffered message acknowledgements.
+ * @param done - function - Callback function to be called.
+ * @returns {Array}
+ */
+window.WAPI.getBufferedNewAcks = function (done) {
+  let bufferedAcks = window.WAPI._newAcksBuffer;
+  window.WAPI._newAcksBuffer = [];
+  if (done !== undefined) {
+    done(bufferedAcks);
+  }
+  return bufferedAcks;
+};
 /** End new messages observable functions **/
 
 window.WAPI.sendImage = function (imgBase64, chatid, filename, caption, done) {
@@ -1691,7 +1712,9 @@ window.WAPI.sendVideoAsGif = function (imgBase64, chatid, filename, caption, don
       media.mediaPrep._mediaData.isGif = true;
       media.mediaPrep._mediaData.gifAttribution = 1;
       media.mediaPrep.sendToChat(chat, {caption: caption});
-    }).finally(()=>{if (done !== undefined) done(true)});
+    }).finally(() => {
+      if (done !== undefined) done(true)
+    });
   });
 }
 
@@ -1860,9 +1883,9 @@ window.WAPI.getNewMessageId = function (chatId) {
  * @param {boolean} on true to turn on similated typing, false to turn it off //you need to manually turn this off.
  */
 window.WAPI.simulateTyping = function (chatId, on, done) {
-  if (on){
+  if (on) {
     Store.ChatStates.sendChatStateComposing(chatId);
-  }else{
+  } else {
     Store.ChatStates.sendChatStatePaused(chatId);
   }
   done()

@@ -14,7 +14,6 @@ cryptography = "*"
 aiohttp = "*"
 six = "*"
 typing = "*"
-numpy = "*"
 python-magic = "*"
 
 

@@ -1,7 +1,5 @@
 import os
 import time
-import collections
-import numpy as np
 
 from selenium.common.exceptions import WebDriverException, JavascriptException
 from six import string_types
@@ -152,7 +150,8 @@ class NewMessagesObservable(Thread):
         self.wapi_js_wrapper = wapi_js_wrapper
         self.wapi_driver = wapi_driver
         self.webdriver = webdriver
-        self.observers = []
+        self.new_msgs_observers = []
+        self.new_acks_observers = []
         self.running = False
 
     def run(self):
@@ -160,13 +159,21 @@ class NewMessagesObservable(Thread):
         while self.running:
             try:
                 new_js_messages = self.wapi_js_wrapper.getBufferedNewMessages()
-                if isinstance(new_js_messages, (collections.Sequence, np.ndarray)) and len(new_js_messages) > 0:
+                if isinstance(new_js_messages, list) and len(new_js_messages) > 0:
                     new_messages = []
                     for js_message in new_js_messages:
                         new_messages.append(factory_message(js_message, self.wapi_driver))
 
-                    self._inform_all(new_messages)
-            except Exception as e:  # noqa F841
+                    self._inform_new_msgs(new_messages)
+
+                new_js_acks = self.wapi_js_wrapper.getBufferedNewAcks()
+                if isinstance(new_js_acks, list) and len(new_js_acks) > 0:
+                    new_acks = []
+                    for js_ack in new_js_acks:
+                        new_acks.append(factory_message(js_ack, self.wapi_driver))
+
+                    self._inform_new_acks(new_acks)
+            except Exception as e:
                 pass
 
             time.sleep(2)
@@ -175,15 +182,24 @@ class NewMessagesObservable(Thread):
         self.running = False
 
     def subscribe(self, observer):
-        inform_method = getattr(observer, "on_message_received", None)
-        if not callable(inform_method):
-            raise Exception('You need to inform an observable that implements \'on_message_received(new_messages)\'.')
-
-        self.observers.append(observer)
+        new_messages_method = getattr(observer, "on_message_received", None)
+        if callable(new_messages_method):
+            self.new_msgs_observers.append(observer)
+        new_acks_method = getattr(observer, "on_ack_received", None)
+        if callable(new_acks_method):
+            self.new_acks_observers.append(observer)
 
     def unsubscribe(self, observer):
-        self.observers.remove(observer)
+        try:
+            self.new_msgs_observers.remove(observer)
+            self.new_acks_observers.remove(observer)
+        except ValueError:
+            pass
 
-    def _inform_all(self, new_messages):
-        for observer in self.observers:
+    def _inform_new_msgs(self, new_messages):
+        for observer in self.new_msgs_observers:
             observer.on_message_received(new_messages)
+
+    def _inform_new_acks(self, new_acks):
+        for observer in self.new_acks_observers:
+            observer.new_acks_method(new_acks)

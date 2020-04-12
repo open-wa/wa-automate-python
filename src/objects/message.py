@@ -54,6 +54,7 @@ class Message(WhatsappObject):
 
         self.id = js_obj["id"]
         self.type = js_obj["type"]
+        self.ack = js_obj["ack"]
         self.sender = Contact(js_obj["sender"], driver) if js_obj["sender"] else False
         self.timestamp = datetime.fromtimestamp(js_obj["timestamp"])
         self.chat_id = js_obj['chatId']

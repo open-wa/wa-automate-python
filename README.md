@@ -37,7 +37,8 @@ It is based on the official Whatsapp Web Browser Application and uses Selenium b
 | [Simulated '...typing'](#simulate-typing)             |             | ✅          |
 | [Send GIFs!](#sending-gifs)                       |             | ✅          |
 | [Forward Messages](#sending-gifs)                  |             | ✅          |
-| [Listen to Read Receipts](#listen-to-read-receipts)           |             | ❌          |
+| [Listen to New Messages](#listen-to-read-receipts)           |             | ✅          |
+| [Listen to Read Receipts](#listen-to-read-receipts)           |             | ✅          |
 | [Listen to Live Locations](#listen-to-live-locations)           |             | ❌          |
 | [Group participant changes](#group-participant-changes)         |             | ❌          |
 | [Create Groups](#create-group)         |             | ✅          |
