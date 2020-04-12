@@ -1962,9 +1962,13 @@ window.WAPI.getNewMessageId = function (chatId) {
  * @param {string} chatId '000000000000@c.us'
  * @param {boolean} on true to turn on similated typing, false to turn it off //you need to manually turn this off.
  */
-window.WAPI.simulateTyping = async function (chatId, on) {
-  if (on) await Store.ChatStates.sendChatStateComposing(chatId)
-  else await Store.ChatStates.sendChatStatePaused(chatId)
+window.WAPI.simulateTyping = function (chatId, on, done) {
+  if (on){
+    Store.ChatStates.sendChatStateComposing(chatId);
+  }else{
+    Store.ChatStates.sendChatStatePaused(chatId);
+  }
+  done()
 };
 
 /**
