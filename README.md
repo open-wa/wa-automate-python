@@ -35,7 +35,7 @@ It is based on the official Whatsapp Web Browser Application and uses Selenium b
 | [Last seen & isOnline (beta)]      |             | ❌          |
 | [📍 SEND LOCATION!! (beta)](#sending-location)         |             | ❌          |
 | [Simulated '...typing'](#simulate-typing)             |             | ✅          |
-| [Send GIFs!](#sending-gifs)                       |             | ❌          |
+| [Send GIFs!](#sending-gifs)                       |             | ✅          |
 | [Forward Messages](#sending-gifs)                  |             | ✅          |
 | [Listen to Read Receipts](#listen-to-read-receipts)           |             | ❌          |
 | [Listen to Live Locations](#listen-to-live-locations)           |             | ❌          |

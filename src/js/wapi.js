@@ -1781,10 +1781,7 @@ window.WAPI.setMyStatus = function (newStatus) {
 }
 
 window.WAPI.sendVideoAsGif = function (imgBase64, chatid, filename, caption, done) {
-  //var idUser = new window.Store.UserConstructor(chatid);
-  var idUser = new Store.WidFactory.createWid(chatid);
-  // create new chat
-  return Store.Chat.find(idUser).then((chat) => {
+  return Store.Chat.find(chatid).then((chat) => {
     var mediaBlob = window.WAPI.base64ImageToFile(imgBase64, filename);
     var mc = new Store.MediaCollection(chat);
     window.WAPI.procFiles(chat, mediaBlob).then(mc => {
@@ -1792,8 +1789,7 @@ window.WAPI.sendVideoAsGif = function (imgBase64, chatid, filename, caption, don
       media.mediaPrep._mediaData.isGif = true;
       media.mediaPrep._mediaData.gifAttribution = 1;
       media.mediaPrep.sendToChat(chat, {caption: caption});
-      if (done !== undefined) done(true);
-    });
+    }).finally(()=>{if (done !== undefined) done(true)});
   });
 }
 

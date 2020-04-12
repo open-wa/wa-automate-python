@@ -8,12 +8,14 @@ import binascii
 import io
 import logging
 import os
+import re
 import shutil
 import tempfile
 from base64 import b64decode
 from io import BytesIO
 from json import dumps, loads
 
+import requests
 from PIL import Image
 from axolotl.kdf.hkdfv3 import HKDFv3
 from axolotl.util.byteutil import ByteUtil
@@ -154,7 +156,7 @@ class WhatsAPIDriver(object):
 
     def __init__(self, client="firefox", username="API", proxy=None, command_executor=None, loadstyles=False,
                  profile=None, headless=False, autoconnect=True, logger=None, extra_params=None, chrome_options=None,
-                 executable_path=None):
+                 executable_path=None, script_timeout=60):
         """Initialises the webdriver"""
 
         self.logger = logger or self.logger
@@ -248,7 +250,7 @@ class WhatsAPIDriver(object):
         self.username = username
         self.wapi_functions = WapiJsWrapper(self.driver, self)
 
-        self.driver.set_script_timeout(500)
+        self.driver.set_script_timeout(script_timeout)
         self.driver.implicitly_wait(10)
 
         if autoconnect:
@@ -671,7 +673,7 @@ class WhatsAPIDriver(object):
 
     def send_image_as_sticker(self, path, chatid):
         """
-        Converts the file to base64 and sends it using the sendImage function of wapi.js
+        Converts the file to base64 and sends it using the sendImageAsSticker function of wapi.js
         :param path: file path
         :param chatid: chatId to be sent
         :param caption:
@@ -696,6 +698,26 @@ class WhatsAPIDriver(object):
         imgBase64 = convert_to_base64(path)
         filename = os.path.split(path)[-1]
         return self.wapi_functions.sendImage(imgBase64, chatid, filename, caption)
+
+    def send_video_as_gif(self, path, chatid, caption):
+        """
+        :param path: video file path
+        :param chatid: chatId to be sent
+        :param caption: text to send with video
+        :return:
+        """
+        imgBase64 = convert_to_base64(path)
+        filename = os.path.split(path)[-1]
+        return self.wapi_functions.sendVideoAsGif(imgBase64, chatid, filename, caption)
+
+    def send_giphy(self, giphy_url, chat_id, caption):
+        match = re.search(r'https?:\/\/media\.giphy\.com\/media\/([a-zA-Z0-9]+)', giphy_url)
+        if match:
+            giphy_id = match.group(1)
+            filename = giphy_id + '.mp4'
+            resp = requests.get('https://i.giphy.com/' + filename)
+            b64 = convert_to_base64(io.BytesIO(resp.content))
+            return self.wapi_functions.sendVideoAsGif(b64, chat_id, filename, caption)
 
     def send_contact(self, chat_id, contact_ids):
         return self.wapi_functions.sendContact(chat_id, contact_ids)
