@@ -30,6 +30,18 @@ class Chat(WhatsappObjectWithId):
         return self.driver.send_media(image_path, self.id, caption)
 
     @driver_needed
+    def send_video_as_gif(self, image_path, caption=None):
+        return self.driver.send_video_as_gif(image_path, self.id, caption)
+
+    @driver_needed
+    def send_giphy(self, giphy_url, caption=None):
+        return self.driver.send_giphy(giphy_url, self.id, caption)
+
+    @driver_needed
+    def send_location(self, lat, long, text=None):
+        return self.driver.send_location(self.id, lat, long, text)
+
+    @driver_needed
     def send_message_with_thumb(self, image_path, url, title, description, text):
         return self.driver.send_message_with_thumbnail(image_path, self.id, url, title, description, text)
 
@@ -41,9 +53,11 @@ class Chat(WhatsappObjectWithId):
     def send_seen(self):
         return self.driver.chat_send_seen(self.id)
 
+    @driver_needed
     def get_messages(self, include_me=False, include_notifications=False):
         return list(self.driver.get_all_messages_in_chat(self, include_me, include_notifications))
 
+    @driver_needed
     def get_unread_messages(self,
                             include_me=False,
                             include_notifications=False):
@@ -67,12 +81,15 @@ class Chat(WhatsappObjectWithId):
 
     # get_unread_messages()
 
+    @driver_needed
     def load_earlier_messages(self):
         self.driver.chat_load_earlier_messages(self.id)
 
+    @driver_needed
     def load_all_earlier_messages(self):
         self.driver.chat_load_all_earlier_messages(self.id)
 
+    @driver_needed
     def load_earlier_messages_till(self, last):
         """
         Triggers loading of messages till a specific point in time
@@ -84,6 +101,10 @@ class Chat(WhatsappObjectWithId):
         """
         timestamp = time.mktime(last.timetuple())
         self.driver.wapi_functions.loadEarlierMessagesTillDate(self.id, timestamp)
+
+    @driver_needed
+    def set_typing_simulation(self, typing):
+        self.driver.set_typing_simulation(self.id, typing)
 
 
 class UserChat(Chat):
@@ -124,6 +145,22 @@ class GroupChat(Chat):
     @driver_needed
     def get_admins(self):
         return list(self.driver.group_get_admins(self.id))
+
+    @driver_needed
+    def add_participant_group(self, id_participant):
+        return self.driver.add_participant_group(self.id, id_participant)
+
+    @driver_needed
+    def remove_participant_group(self, id_participant):
+        return self.driver.remove_participant_group(self.id, id_participant)
+
+    @driver_needed
+    def promove_participant_admin_group(self, id_participant):
+        return self.driver.promove_participant_admin_group(self.id, id_participant)
+
+    @driver_needed
+    def demote_participant_admin_group(self, id_participant):
+        return self.driver.demote_participant_admin_group(self.id, id_participant)
 
     def __repr__(self):
         safe_name = safe_str(self.name)
