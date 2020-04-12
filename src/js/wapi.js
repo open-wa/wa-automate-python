@@ -828,7 +828,7 @@ window.WAPI.getLastSeen = async function (id, done) {
     if (presence.chatstate.t) {
       resolve(presence.chatstate.t)
     } else {
-      presence.on('change:chatstate.type', (data) => {
+      presence.on('change:chatstate.t', (data) => {
         resolve(data.t)
       });
       presence.subscribe()
@@ -1418,13 +1418,16 @@ window.WAPI.checkNumberStatus = async function (id, done) {
 };
 
 /**
- * New messages observable functions.
+ * Observable functions.
  */
-window.WAPI._newMessagesQueue = [];
-window.WAPI._newMessagesBuffer = (sessionStorage.getItem('saved_msgs') != null) ? JSON.parse(sessionStorage.getItem('saved_msgs')) : [];
-window.WAPI._newAcksBuffer = (sessionStorage.getItem('saved_acks') != null) ? JSON.parse(sessionStorage.getItem('saved_acks')) : [];
-window.WAPI._newMessagesDebouncer = null;
-window.WAPI._newMessagesCallbacks = [];
+WAPI._newMessagesQueue = [];
+WAPI._newMessagesBuffer = (sessionStorage.getItem('saved_msgs') != null) ? JSON.parse(sessionStorage.getItem('saved_msgs')) : [];
+WAPI._newAcksBuffer = (sessionStorage.getItem('saved_acks') != null) ? JSON.parse(sessionStorage.getItem('saved_acks')) : [];
+WAPI._participantChangesBuffer = (sessionStorage.getItem('parti_changes') != null) ? JSON.parse(sessionStorage.getItem('parti_changes')) : [];
+WAPI._liveLocUpdatesBuffer = (sessionStorage.getItem('liveloc_updates') != null) ? JSON.parse(sessionStorage.getItem('liveloc_updates')) : [];
+WAPI._newAcksBuffer = (sessionStorage.getItem('saved_acks') != null) ? JSON.parse(sessionStorage.getItem('saved_acks')) : [];
+WAPI._newMessagesDebouncer = null;
+WAPI._newMessagesCallbacks = [];
 
 window.Store.Msg.off('add');
 sessionStorage.removeItem('saved_msgs');
@@ -1559,7 +1562,7 @@ window.WAPI.waitNewAcknowledgements = function (callback) {
   return true;
 }
 
-window.WAPI.onLiveLocation = function (chatId, callback) {
+window.WAPI.onLiveLocation = function (chatId, callback, done) {
   var lLChat = Store.LiveLocation.get(chatId);
   if (lLChat) {
     var validLocs = lLChat.participants.validLocations();
@@ -1569,11 +1572,13 @@ window.WAPI.onLiveLocation = function (chatId, callback) {
       const l = {
         id: id.toString(), lat, lng, accuracy, degrees, speed, lastUpdated
       };
-      // console.log('newloc',l)
+      WAPI._liveLocUpdatesBuffer.push(l);
       callback(l);
     }));
+    done(true);
     return true;
   } else {
+    done(false);
     return false;
   }
 }
@@ -1590,7 +1595,7 @@ window.WAPI.onBattery = function (callback) {
  * @returns {boolean}
  */
 var groupParticpiantsEvents = {};
-window.WAPI.onParticipantsChanged = function (groupId, callback) {
+window.WAPI.onParticipantsChanged = function (groupId, callback, done) {
   const subtypeEvents = [
     "invite",
     "add",
@@ -1632,18 +1637,22 @@ window.WAPI.onParticipantsChanged = function (groupId, callback) {
             // // previewMessage.from.toString()
             // x removed y
             // x added y
-            callback({
+            let event = {
+              id: groupId,
               by: from.toString(),
               action: subtype,
               who: recipients
-            });
+            };
+            callback(event);
+            WAPI._participantChangesBuffer.push(event);
             chat.off("all", this)
             i = 0;
           }
         }
       }
     })
-  )
+  );
+  done();
   return true;
 }
 
@@ -1664,31 +1673,25 @@ window.WAPI.onAddedToGroup = function (callback) {
 }
 
 /**
- * Reads buffered new messages.
- * @param done - function - Callback function to be called contained the buffered messages.
+ * Reads buffered events.
+ * @param done - function - Callback function to be called contained the buffered events
  * @returns {Array}
  */
-window.WAPI.getBufferedNewMessages = function (done) {
-  let bufferedMessages = window.WAPI._newMessagesBuffer;
-  window.WAPI._newMessagesBuffer = [];
+WAPI.getBufferedEvents = function (done) {
+  let bufferedEvents = {
+    'new_msgs': WAPI._newMessagesBuffer,
+    'new_acks': WAPI._newAcksBuffer,
+    'parti_changes': WAPI._participantChangesBuffer,
+    'liveloc_updates': WAPI._liveLocUpdatesBuffer,
+  };
+  WAPI._newMessagesBuffer = [];
+  WAPI._newAcksBuffer = [];
+  WAPI._participantChangesBuffer = [];
+  WAPI._liveLocUpdatesBuffer = [];
   if (done !== undefined) {
-    done(bufferedMessages);
+    done(bufferedEvents);
   }
-  return bufferedMessages;
-};
-
-/**
- * Reads buffered message acknowledgements.
- * @param done - function - Callback function to be called.
- * @returns {Array}
- */
-window.WAPI.getBufferedNewAcks = function (done) {
-  let bufferedAcks = window.WAPI._newAcksBuffer;
-  window.WAPI._newAcksBuffer = [];
-  if (done !== undefined) {
-    done(bufferedAcks);
-  }
-  return bufferedAcks;
+  return bufferedEvents;
 };
 /** End new messages observable functions **/
 

@@ -1,5 +1,6 @@
 import os
 import time
+from enum import Enum, auto
 
 from selenium.common.exceptions import WebDriverException, JavascriptException
 from six import string_types
@@ -62,7 +63,7 @@ class WapiJsWrapper(object):
         except NameError:
             script_path = os.getcwd()
 
-        result = self.driver.execute_script("if (document.querySelector('*[data-icon=chat]') !== null) { return true } else { return false }")  # noqa E501
+        result = self.driver.execute_script("if (document.querySelector('*[data-icon=chat]') !== null) { return true } else { return false }")
         if result:
             with open(os.path.join(script_path, "js", "wapi.js"), "r") as script:
                 self.driver.execute_script(script.read())
@@ -102,6 +103,9 @@ class JsArg(object):
 
         if isinstance(self.obj, bool):
             return str(self.obj).lower()
+
+        if self.obj is None:
+            return 'null'
 
         return str(self.obj)
 
@@ -152,13 +156,17 @@ class NewMessagesObservable(Thread):
         self.webdriver = webdriver
         self.new_msgs_observers = []
         self.new_acks_observers = []
+        self.group_change_observers = {}
+        self.liveloc_update_observers = {}
         self.running = False
 
     def run(self):
         self.running = True
         while self.running:
             try:
-                new_js_messages = self.wapi_js_wrapper.getBufferedNewMessages()
+                js_events = self.wapi_js_wrapper.getBufferedEvents()
+
+                new_js_messages = js_events['new_msgs']
                 if isinstance(new_js_messages, list) and len(new_js_messages) > 0:
                     new_messages = []
                     for js_message in new_js_messages:
@@ -166,13 +174,21 @@ class NewMessagesObservable(Thread):
 
                     self._inform_new_msgs(new_messages)
 
-                new_js_acks = self.wapi_js_wrapper.getBufferedNewAcks()
+                new_js_acks = js_events['new_acks']
                 if isinstance(new_js_acks, list) and len(new_js_acks) > 0:
                     new_acks = []
                     for js_ack in new_js_acks:
                         new_acks.append(factory_message(js_ack, self.wapi_driver))
 
                     self._inform_new_acks(new_acks)
+
+                events = js_events['parti_changes']
+                if isinstance(events, list) and len(events) > 0:
+                    self._inform_group_changes(events)
+
+                events = js_events['liveloc_updates']
+                if isinstance(events, list) and len(events) > 0:
+                    self._inform_liveloc_updates(events)
             except Exception as e:
                 pass
 
@@ -181,19 +197,54 @@ class NewMessagesObservable(Thread):
     def stop(self):
         self.running = False
 
-    def subscribe(self, observer):
-        new_messages_method = getattr(observer, "on_message_received", None)
-        if callable(new_messages_method):
+    def subscribe_new_messages(self, observer):
+        callback = getattr(observer, "on_message_received", None)
+        if callable(callback):
             self.new_msgs_observers.append(observer)
-        new_acks_method = getattr(observer, "on_ack_received", None)
-        if callable(new_acks_method):
+
+    def subscribe_acks(self, observer):
+        callback = getattr(observer, "on_ack_received", None)
+        if callable(callback):
             self.new_acks_observers.append(observer)
 
-    def unsubscribe(self, observer):
+    def subscribe_group_participants_change(self, observer, chat_id):
+        callback = getattr(observer, "on_participants_change", None)
+        if callable(callback):
+            self.wapi_js_wrapper.onParticipantsChanged(chat_id, None)
+            if chat_id not in self.group_change_observers:
+                self.group_change_observers[chat_id] = []
+            self.group_change_observers[chat_id].append(observer)
+
+    def subscribe_live_location_updates(self, observer, chat_id):
+        callback = getattr(observer, "on_live_location_update", None)
+        if callable(callback):
+            self.wapi_js_wrapper.onLiveLocation(chat_id, None)
+            if chat_id not in self.liveloc_update_observers:
+                self.liveloc_update_observers[chat_id] = []
+            self.liveloc_update_observers[chat_id].append(observer)
+
+    def unsubscribe_new_messages(self, observer):
         try:
             self.new_msgs_observers.remove(observer)
+        except ValueError:
+            pass
+
+    def unsubscribe_acks(self, observer):
+        try:
             self.new_acks_observers.remove(observer)
         except ValueError:
+            pass
+
+    def unsubscribe_group_participants_change(self, observer, chat_id):
+        try:
+            self.group_change_observers[chat_id].remove(observer)
+        except (KeyError, ValueError):
+            pass
+
+    def unsubscribe_live_location_updates(self, observer, chat_id):
+        try:
+            self.group_change_observers[chat_id].remove(observer)
+        except (KeyError, ValueError):
             pass
 
     def _inform_new_msgs(self, new_messages):
@@ -203,3 +254,15 @@ class NewMessagesObservable(Thread):
     def _inform_new_acks(self, new_acks):
         for observer in self.new_acks_observers:
             observer.new_acks_method(new_acks)
+
+    def _inform_group_changes(self, events):
+        for event in events:
+            if event['id'] in self.group_change_observers:
+                for o in self.group_change_observers[event['id']]:
+                    o.on_participants_change(event)
+
+    def _inform_liveloc_updates(self, events):
+        for event in events:
+            if event['id'] in self.liveloc_update_observers:
+                for o in self.liveloc_update_observers[event['id']]:
+                    o.on_live_location_update(event)
