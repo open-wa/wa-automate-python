@@ -75,6 +75,7 @@ class WhatsAPIDriver(object):
         'firstrun': "#wrapper",
         'qrCode': "canvas[aria-label=\"Scan me!\"]",
         'qrCodePlain': "div[data-ref]",
+        'QRReloader': 'div[data-ref] > span > div',
         'mainPage': ".app.two",
         'chatList': ".infinite-list-viewport",
         'messageList': "#main > div > div:nth-child(1) > div > div.message-list",
@@ -89,7 +90,6 @@ class WhatsAPIDriver(object):
         'UnreadChatBanner': '.message-list',
         'ReconnectLink': '.action',
         'WhatsappQrIcon': 'span.icon:nth-child(2)',
-        'QRReloader': 'div[data-ref] > span > div'
     }
 
     _CLASSES = {
@@ -156,7 +156,7 @@ class WhatsAPIDriver(object):
 
     def __init__(self, client="firefox", username="API", proxy=None, command_executor=None, loadstyles=False,
                  profile=None, headless=False, autoconnect=True, logger=None, extra_params=None, chrome_options=None,
-                 executable_path=None, script_timeout=60):
+                 executable_path=None, script_timeout=60, element_timeout=30):
         """Initialises the webdriver"""
 
         self.logger = logger or self.logger
@@ -251,7 +251,7 @@ class WhatsAPIDriver(object):
         self.wapi_functions = WapiJsWrapper(self.driver, self)
 
         self.driver.set_script_timeout(script_timeout)
-        self.driver.implicitly_wait(10)
+        self.element_timeout = element_timeout
 
         if autoconnect:
             self.connect()
@@ -315,10 +315,17 @@ class WhatsAPIDriver(object):
         return self.wapi_functions.isConnected()
 
     def wait_for_login(self, timeout=90):
-        """Waits for the QR to go away"""
-        WebDriverWait(self.driver, timeout).until(
-            EC.visibility_of_element_located((By.CSS_SELECTOR, self._SELECTORS['mainPage']))
-        )
+        """
+        Waits for the app to log in or for the QR to appear
+        :return: bool: True if has logged in, false if asked for QR
+        """
+        WebDriverWait(self.driver, timeout).until(EC.visibility_of_element_located((By.CSS_SELECTOR, self._SELECTORS['mainPage'] + ',' + self._SELECTORS['qrCode'])))
+        try:
+            self.driver.find_element_by_css_selector(self._SELECTORS['mainPage'])
+            return True
+        except NoSuchElementException:
+            self.driver.find_element_by_css_selector(self._SELECTORS['qrCode'])
+            return False
 
     def screenshot(self, filename):
         self.driver.get_screenshot_as_file(filename)
@@ -341,13 +348,17 @@ class WhatsAPIDriver(object):
     # QR
     #################
     def get_qr_plain(self):
-        return self.driver.find_element_by_css_selector(self._SELECTORS['qrCodePlain']).get_attribute("data-ref")
+        self.reload_qr()
+        return WebDriverWait(self.driver, self.element_timeout) \
+            .until(EC.visibility_of_element_located((By.CSS_SELECTOR, self._SELECTORS['qrCodePlain']))) \
+            .get_attribute("data-ref")
 
     def get_qr(self, filename=None):
         """Get pairing QR code from client"""
-        if "Click to reload QR code" in self.driver.page_source:
-            self.reload_qr()
-        qr = self.driver.find_element_by_css_selector(self._SELECTORS['qrCode'])
+        self.reload_qr()
+        qr = WebDriverWait(self.driver, self.element_timeout) \
+            .until(EC.visibility_of_element_located((By.CSS_SELECTOR, self._SELECTORS['qrCode'])))
+
         if filename is None:
             fd, fn_png = tempfile.mkstemp(prefix=self.username, suffix='.png')
         else:
@@ -359,14 +370,17 @@ class WhatsAPIDriver(object):
         return fn_png
 
     def get_qr_base64(self):
-        if "Click to reload QR code" in self.driver.page_source:
-            self.reload_qr()
-        qr = self.driver.find_element_by_css_selector(self._SELECTORS['qrCode'])
+        self.reload_qr()
+        qr = WebDriverWait(self.driver, self.element_timeout) \
+            .until(EC.visibility_of_element_located((By.CSS_SELECTOR, self._SELECTORS['qrCode'])))
 
         return qr.screenshot_as_base64
 
     def reload_qr(self):
-        self.driver.find_element_by_css_selector(self._SELECTORS['QRReloader']).click()
+        try:
+            self.driver.find_element_by_css_selector(self._SELECTORS['QRReloader']).click()
+        except NoSuchElementException:
+            pass
 
     #################
     # Chats & Contacts
