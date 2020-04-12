@@ -666,6 +666,9 @@ class WhatsAPIDriver(object):
             return factory_message(result, self)
         return result
 
+    def chat_forward_messages(self, chat_id_to, message_ids, skip_my_messages=False):
+        return self.wapi_functions.forwardMessages(chat_id_to, message_ids, skip_my_messages)
+
     def send_image_as_sticker(self, path, chatid):
         """
         Converts the file to base64 and sends it using the sendImage function of wapi.js

@@ -31,12 +31,12 @@ It is based on the official Whatsapp Web Browser Application and uses Selenium b
 | Send stickers                     |             |✅           |
 | [Decrypt media (image, audio, doc)](#decrypting-media) |             | ❌          |
 | [Capturing QR Code](#capturing-qr-code)                 |             | ✅          |
-| [Multiple Sessions](#managing-multiple-sessions-at-once)                 |             | ❌          |
+| [Multiple Sessions](#managing-multiple-sessions-at-once)                 |             | ✅          |
 | [Last seen & isOnline (beta)]      |             | ❌          |
 | [📍 SEND LOCATION!! (beta)](#sending-location)         |             | ❌          |
 | [Simulated '...typing'](#simulate-typing)             |             | ❌          |
 | [Send GIFs!](#sending-gifs)                       |             | ❌          |
-| [Forward Messages](#sending-gifs)                  |             | ❌          |
+| [Forward Messages](#sending-gifs)                  |             | ✅          |
 | [Listen to Read Receipts](#listen-to-read-receipts)           |             | ❌          |
 | [Listen to Live Locations](#listen-to-live-locations)           |             | ❌          |
 | [Group participant changes](#group-participant-changes)         |             | ❌          |
