@@ -11,6 +11,7 @@ import ast
 from codecs import open
 import os
 # Always prefer setuptools over distutils
+import setuptools
 from setuptools import setup
 
 PACKAGE_NAME = 'src'
@@ -43,7 +44,7 @@ with open(path, 'r') as file:
             break
 
 setup(
-    name='webwhatsapi',
+    name='openwa',
 
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
@@ -77,8 +78,7 @@ setup(
 
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.8',
     ],
 
     # What does your project relate to?
@@ -86,16 +86,6 @@ setup(
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
-    packages=[PACKAGE_NAME, ],
-    install_requires=[
-        # 'aiohttp', see https://github.com/mukulhase/WebWhatsAPI/issues/159
-        'python-dateutil>=2.6.0',
-        'selenium>=3.4.3',
-        'six>=1.10.0',
-        'python-axolotl',
-        'cryptography',
-        'python-magic'
-    ],
-    extras_require={
-    },
+    packages=['openwa'],
+    package_dir={'openwa': 'src'}
 )

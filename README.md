@@ -4,6 +4,7 @@
 # wa-automate-python
 
 ## (Based on web.whatsapp.com)
+![PyPI version](https://badge.fury.io/py/openwa.svg)
 <a href="https://discord.gg/dnpp72a"><img src="https://img.shields.io/discord/661438166758195211?color=blueviolet&label=discord&style=flat" /></a>
 [![Firefox version](https://img.shields.io/badge/Firefox-75.0-green.svg)]()
 </div>
@@ -54,17 +55,13 @@ You will need to install [Gecko Driver](https://github.com/mozilla/geckodriver) 
 
 #### From PyPI
 - Install from pip
-`pip install webwhatsapi`
-
-#### From pipenv
-- Install from pipenv
-`pipenv install`
+`pip install openwa`
 
 ## Usage
 
 ### 1. Import library
 
-    from webwhatsapi import WhatsAPIDriver
+    from openwa import WhatsAPIDriver
 
 ### 2. Instantiate driver 
 
