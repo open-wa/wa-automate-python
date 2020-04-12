@@ -724,6 +724,9 @@ class WhatsAPIDriver(object):
         """
         return self.wapi_functions.deleteMessage(chat_id, message_array, revoke)
 
+    def set_typing_simulation(self, chat_id, typing):
+        return self.wapi_functions.simulateTyping(chat_id, typing)
+
     def download_media(self, media_msg, force_download=False):
         if not force_download:
             try:
