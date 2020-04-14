@@ -49,10 +49,6 @@ It is based on the official Whatsapp Web Browser Application and uses Selenium b
 ##### Dependencies
 You will need to install [Gecko Driver](https://github.com/mozilla/geckodriver) separately, if using firefox, which is the default.
 
-#### From Source
-- Clone the repository
-- Use `pip install -r requirements.txt` to install the required packages
-
 #### From PyPI
 - Install from pip
 `pip install openwa`
