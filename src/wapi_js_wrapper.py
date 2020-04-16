@@ -253,7 +253,7 @@ class NewMessagesObservable(Thread):
 
     def _inform_new_acks(self, new_acks):
         for observer in self.new_acks_observers:
-            observer.new_acks_method(new_acks)
+            observer.on_ack_received(new_acks)
 
     def _inform_group_changes(self, events):
         for event in events:
