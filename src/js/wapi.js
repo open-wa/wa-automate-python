@@ -288,12 +288,12 @@ window.WAPI._serializeProfilePicThumb = (obj) => {
   });
 }
 
-window.WAPI.createGroup = async function (name, contactsId) {
+window.WAPI.createGroup = async function (name, contactsId, done) {
   if (!Array.isArray(contactsId)) {
     contactsId = [contactsId];
   }
-
-  return await window.Store.WapQuery.createGroup(name, contactsId);
+  await window.Store.WapQuery.createGroup(name, contactsId);
+  return done();
 };
 
 /**
