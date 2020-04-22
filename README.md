@@ -91,7 +91,7 @@ Once you scan the QR obtained, you are ready to use the rest of the funcionality
 
 ### Viewing unread messages
 
-    unread_messages = driver.view_unread()
+    unread_messages = driver.get_unread()
 
 ### Forwarding messages
 You need to pass the following params:
