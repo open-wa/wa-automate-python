@@ -2576,6 +2576,14 @@ window.WAPI._STICKERDUMP = async function (chatId) {
   })
 }
 
+
+WAPI.openChat = function(chatId, done){
+  if(WAPI.getAllChatIds().includes(chatId)){
+    new Store.OpenChat().openChat(chatId)
+  }
+  done()
+}
+
 /**
  * This next line is jsSha
  */

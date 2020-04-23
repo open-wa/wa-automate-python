@@ -486,6 +486,9 @@ class WhatsAPIDriver(object):
         else:
             return []
 
+    def open_chat(self, chat_id):
+        return self.wapi_functions.openChat(chat_id)
+
     def get_all_chat_ids(self):
         """
         Fetches all chat ids

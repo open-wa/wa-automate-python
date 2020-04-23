@@ -26,6 +26,10 @@ class Chat(WhatsappObjectWithId):
             self.last_seen = js_obj["lastSeen"]
 
     @driver_needed
+    def open(self):
+        return self.driver.open_chat(self.id)
+
+    @driver_needed
     def send_media(self, image_path, caption=None):
         return self.driver.send_media(image_path, self.id, caption)
 
