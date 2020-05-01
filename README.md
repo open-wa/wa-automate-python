@@ -6,7 +6,8 @@
 ## (Based on web.whatsapp.com)
 ![PyPI version](https://badge.fury.io/py/openwa.svg)
 <a href="https://discord.gg/dnpp72a"><img src="https://img.shields.io/discord/661438166758195211?color=blueviolet&label=discord&style=flat" /></a>
-[![Firefox version](https://img.shields.io/badge/Firefox-75.0-green.svg)]()
+[![Firefox version](https://img.shields.io/badge/Firefox-75-green.svg)]()
+[![Chrome version](https://img.shields.io/badge/Chrome-81-green.svg)]()
 </div>
 
 ## What is it?
@@ -44,10 +45,35 @@ It is based on the official Whatsapp Web Browser Application and uses Selenium b
 | Create Groups         |             | ✅          |
 | add, remove, promote, demote participants         |             | ✅          |
 
+## Starting a conversation
+To start a new conversation, there are two options:
+1. The other person contacts you first. Once the other person contacts you, you'll have that chat available to send messages. 
+2. With a license key. In order to unlock the functionality to send texts to unknown numbers through @open-wa/wa-automate itself, you will need an License key.
+
+    One License Key is valid for one number. Each License Key is USD 5 per month or USD 50 per year. Instructions below.
+    
+## License key
+How to get an License key:
+1. Go to [Gumroad](https://gumroad.com/mrodal#dhED)
+2. Select the subscription option (monthly/annually)
+3. At checkout enter the phone number with which you are going to use the bot and the reason why you need this key
+
+    **Important: the phone number must be in the international format, and be just numbers. For example, if the number is +123 456 4564, you must enter 1234564564**
+
+4. You'll receive the license key by email. To use it, you have to pass it to the WhatsAPIDriver in the `license_key` kwarg on initialization
+
+
+Notes:
+- You can change the number assigned to a specific License Key at any time.
+- In order to cancel your License Key, simply stop your membership.
+- Apart from passing your licens_key on initialization, you will need to change nothing else in your code.
+- An added benefit for members is priority on issues.
+- License Key request may be rejected.
+
 ## Local installation
 
 ##### Dependencies
-You will need to install [Gecko Driver](https://github.com/mozilla/geckodriver) separately, if using firefox, which is the default.
+You will need to install [Gecko Driver](https://github.com/mozilla/geckodriver) separately, if using Firefox, which is the default, or [chromedriver](https://chromedriver.chromium.org/downloads) if using Chrome.
 
 #### From PyPI
 - Install from pip
@@ -71,6 +97,7 @@ Possible arguments for constructor:
 - command_executor: Passed directly as an argument to Remote Selenium. Ignore if not using it. See sample directory for remote examples. 
 - loadstyles: Default is False. If True, it will load the styling in the browser.
 - profile: Pass the full path to the profile to load it. Profile folder will be end in ".default". For persistent login, open a normal firefox tab, log in to whatsapp, then pass the profile as an argument.
+- license_key: License key if you have a subscription
 
 ### 3. Wait until you are loged in, or you are asked to scan the QR
 

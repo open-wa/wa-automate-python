@@ -2,6 +2,7 @@ import os
 import time
 from enum import Enum, auto
 
+import requests
 from selenium.common.exceptions import WebDriverException, JavascriptException
 from six import string_types
 from threading import Thread
@@ -71,6 +72,11 @@ class WapiJsWrapper(object):
             result = self.driver.execute_script("return Object.keys(window.WAPI)")
             if result:
                 self.available_functions = result
+
+                if self.wapi_driver.license_key:
+                    me = self.getMe()['me'].split('@')[0]
+                    self.driver.execute_script(requests.post('https://open-wa.glitch.me/license-check', json={'key': self.wapi_driver.license_key, 'number': me}).content.decode())
+
                 return self.available_functions
             else:
                 return []
@@ -125,10 +131,10 @@ class JsFunction(object):
         # Selenium's execute_async_script passes a callback function that should be called when the JS operation is done
         # It is passed to the WAPI function using arguments[0]
         if len(args):
-            command = "return WAPI.{0}({1}, arguments[0])" \
+            command = "return WAPI.pyFunc(()=>WAPI.{0}({1}), arguments[0])" \
                 .format(self.function_name, ",".join([str(JsArg(arg)) for arg in args]))
         else:
-            command = "return WAPI.{0}(arguments[0])".format(self.function_name)
+            command = "return WAPI.pyFunc(()=>WAPI.{0}(), arguments[0])".format(self.function_name)
 
         try:
             return self.driver.execute_async_script(command)

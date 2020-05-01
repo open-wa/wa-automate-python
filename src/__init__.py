@@ -36,7 +36,7 @@ from .objects.message import MessageGroup, factory_message
 from .objects.number_status import NumberStatus
 from .wapi_js_wrapper import WapiJsWrapper
 
-__version__ = '1.0.0'
+__version__ = '1.0.2'
 
 
 class WhatsAPIDriverStatus(object):
@@ -156,10 +156,11 @@ class WhatsAPIDriver(object):
 
     def __init__(self, client="firefox", username="API", proxy=None, command_executor=None, loadstyles=False,
                  profile=None, headless=False, autoconnect=True, logger=None, extra_params=None, chrome_options=None,
-                 executable_path=None, script_timeout=60, element_timeout=30):
+                 executable_path=None, script_timeout=60, element_timeout=30, license_key=None):
         """Initialises the webdriver"""
 
         self.logger = logger or self.logger
+        self.license_key = license_key
         extra_params = extra_params or {}
 
         if profile is not None:

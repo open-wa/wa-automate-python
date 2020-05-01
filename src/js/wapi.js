@@ -975,6 +975,57 @@ window.WAPI.ReplyMessage = function (idMessage, message, done) {
   }
 };
 
+window.WAPI.sendMessageWithMentions = async function (ch, body) {
+  var chat = ch.id ? ch : Store.Chat.get(ch);
+  var chatId = chat.id._serialized;
+  var msgIveSent = chat.msgs.filter(msg => msg.__x_isSentByMe)[0];
+  if (!msgIveSent) return chat.sendMessage(body);
+  var tempMsg = Object.create(msgIveSent);
+  var newId = window.WAPI.getNewMessageId(chatId);
+  var mentionedJidList = body.match(/@(\d*)/g).map(x => new Store.WidFactory.createUserWid(x.replace("@", ""))) || undefined;
+  var extend = {
+    ack: 0,
+    id: newId,
+    local: !0,
+    self: "out",
+    t: parseInt(new Date().getTime() / 1000),
+    to: new Store.WidFactory.createWid(chatId),
+    isNewMsg: !0,
+    type: "chat",
+    body,
+    quotedMsg: null,
+    mentionedJidList
+  };
+  Object.assign(tempMsg, extend);
+  await Store.addAndSendMsgToChat(chat, tempMsg)
+  return newId._serialized;
+}
+
+window.WAPI.sendMessageReturnId = async function (ch, body) {
+  var chat = ch.id ? ch : Store.Chat.get(ch);
+  var chatId = chat.id._serialized;
+  var msgIveSent = chat.msgs.filter(msg => msg.__x_isSentByMe)[0];
+  if (!msgIveSent) return chat.sendMessage(body);
+  var tempMsg = Object.create(msgIveSent);
+  var newId = window.WAPI.getNewMessageId(chatId);
+  var extend = {
+    ack: 0,
+    id: newId,
+    local: !0,
+    self: "out",
+    t: parseInt(new Date().getTime() / 1000),
+    to: new Store.WidFactory.createWid(chatId),
+    isNewMsg: !0,
+    type: "chat",
+    body,
+    quotedMsg: null
+  };
+  Object.assign(tempMsg, extend);
+  await Store.addAndSendMsgToChat(chat, tempMsg)
+  return newId._serialized;
+}
+
+
 window.WAPI.sendMessage = function (id, message, done) {
   var chat = WAPI.getChat(id);
 
@@ -1860,7 +1911,7 @@ window.WAPI.sendContact = function (to, contact, done) {
  * @param {string|array[Message | string]} messages this can be any mixture of message ids or message objects
  * @param {boolean} skipMyMessages This indicates whether or not to skip your own messages from the array
  */
-window.WAPI.forwardMessages = async function (to, messages, skipMyMessages) {
+window.WAPI.forwardMessages = async function (to, messages, skipMyMessages, done) {
   if (!Array.isArray(messages)) {
     messages = [messages];
   }
@@ -1875,7 +1926,8 @@ window.WAPI.forwardMessages = async function (to, messages, skipMyMessages) {
 
   // let userId = new window.Store.UserConstructor(to);
   let conversation = window.Store.Chat.get(to);
-  return await conversation.forwardMessages(finalForwardMessages)
+  await conversation.forwardMessages(finalForwardMessages);
+  done();
 };
 
 /**
