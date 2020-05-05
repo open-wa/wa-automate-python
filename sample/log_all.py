@@ -31,17 +31,17 @@ def print_and_log(text):
 def send_message_to_master(message):
 		phone_safe = masters_number # Phone number with country code
 		phone_whatsapp = "{}@c.us".format(phone_safe) # WhatsApp Chat ID
-		driver.send_message_to_id(phone_whatsapp,message)
+		driver.send_message(phone_whatsapp,message)
 	
 def process_command(command):
 	print_and_log("Processing command: {cmd}".format(cmd=command))
-	if command.lower() == 'status':
+	if command.lower() == '#status':
 		send_message_to_master("I am still alive")
-	elif command.lower() == 'quit':
+	elif command.lower() == '#quit':
 		quit()
-	elif command.lower() == 'ping':
+	elif command.lower() == '#ping':
 		send_message_to_master("The counter is now {ping}".format(ping=pinger))
-	elif command.lower() == 'uptime':
+	elif command.lower() == '#uptime':
 		uptime = datetime.datetime.now() - start_time
 		send_message_to_master("Up since {start}, hence for a total time of {upt} by now".format(start=start_time,upt=uptime))
 	else:
@@ -116,7 +116,7 @@ try:
 					f=open("safechat_" + message.chat_id['_serialized'] + ".chat.log","a+")
 					f.write("[ {sender} | {timestamp} ] {content}\n".format(sender=message.sender.get_safe_name(), timestamp=message.timestamp, content=message.safe_content))
 					f.close()
-					if message.sender.id['user'] == masters_number:
+					if ( (message.chat_id['user'] == masters_number) and (message.content[0:1]=="#") ) :
 						print_and_log("Message from master: '{cmd}'.".format(cmd=message.content))
 						process_command(message.content)
 				elif message.type == 'image' or message.type == 'video' or message.type == 'document' or message.type == 'audio' :
