@@ -395,7 +395,7 @@ class WhatsAPIDriver(object):
         :return: Contact or Error
         :rtype: Contact
         """
-        contact = self.wapi_functions.getContact(contact_id)
+        contact = self.wapi_functions.getContact(contact_id['_serialized'])
 
         if contact is None:
             raise ContactNotFoundError("Contact {0} not found".format(contact_id))
