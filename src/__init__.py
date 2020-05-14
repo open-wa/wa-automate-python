@@ -36,7 +36,7 @@ from .objects.message import MessageGroup, factory_message
 from .objects.number_status import NumberStatus
 from .wapi_js_wrapper import WapiJsWrapper
 
-__version__ = '1.1.0'
+__version__ = '1.1.5'
 
 
 class WhatsAPIDriverStatus(object):
@@ -344,6 +344,12 @@ class WhatsAPIDriver(object):
         Set presence to 'online' or not
         """
         return self.wapi_functions.setPresence(present)
+
+    def set_profile_status(self, status):
+        return self.wapi_functions.setMyStatus(status)
+
+    def set_profile_name(self, name):
+        return self.wapi_functions.setMyName(name)
 
     #################
     # QR
