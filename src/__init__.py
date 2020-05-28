@@ -36,7 +36,7 @@ from .objects.message import MessageGroup, factory_message
 from .objects.number_status import NumberStatus
 from .wapi_js_wrapper import WapiJsWrapper
 
-__version__ = '1.1.5'
+__version__ = '1.1.6'
 
 
 class WhatsAPIDriverStatus(object):
@@ -479,6 +479,13 @@ class WhatsAPIDriver(object):
         """
         my_contacts = self.wapi_functions.getMyContacts()
         return [Contact(contact, self) for contact in my_contacts]
+
+    def get_all_groups(self):
+        chats = self.wapi_functions.getAllGroups()
+        if chats:
+            return [factory_chat(chat, self) for chat in chats]
+        else:
+            return []
 
     def get_all_chats(self):
         """
