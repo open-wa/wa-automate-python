@@ -100,7 +100,7 @@ if (!window.Store || !window.Store.Msg) {
         },
         {
           id: "WidFactory",
-          conditions: (module) => (module.numberToWid && module.createWid && module.createWidFromWidLike) ? module : null
+          conditions: (module) => (module.isWidlike && module.createWid && module.createWidFromWidLike) ? module : null
         },
         {
           id: "Base",

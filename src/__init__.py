@@ -36,7 +36,7 @@ from .objects.message import MessageGroup, factory_message
 from .objects.number_status import NumberStatus
 from .wapi_js_wrapper import WapiJsWrapper
 
-__version__ = '1.1.6'
+__version__ = '1.2.0'
 
 
 class WhatsAPIDriverStatus(object):
@@ -534,32 +534,9 @@ class WhatsAPIDriver(object):
         return self.wapi_functions.areAllMessagesLoaded(chat_id)
 
     def get_profile_pic_from_id(self, id):
-        """
-        Get full profile pic from an id
-        The ID must be on your contact book to
-        successfully get their profile picture.
-
-        :param id: ID
-        :type id: str
-        """
-        profile_pic = self.wapi_functions.getProfilePicFromId(id)
-        if profile_pic:
-            return b64decode(profile_pic)
-        else:
-            return False
-
-    def get_profile_pic_small_from_id(self, id):
-        """
-        Get small profile pic from an id
-        The ID must be on your contact book to
-        successfully get their profile picture.
-
-        :param id: ID
-        :type id: str
-        """
-        profile_pic_small = self.wapi_functions.getProfilePicSmallFromId(id)
-        if profile_pic_small:
-            return b64decode(profile_pic_small)
+        profile_pic_url = self.wapi_functions.getProfilePicFromServer(id)
+        if profile_pic_url:
+            return requests.get(profile_pic_url).content
         else:
             return False
 
@@ -778,6 +755,9 @@ class WhatsAPIDriver(object):
         """
         imgBase64 = convert_to_base64(path, is_thumbnail=True)
         return self.wapi_functions.sendMessageWithThumb(imgBase64, url, title, description, chatid)
+
+    def send_message_with_auto_preview(self, chat_id, url, text):
+        return self.wapi_functions.sendLinkWithAutoPreview(chat_id, url, text)
 
     def delete_message(self, chat_id, message_array, revoke=False):
         """
