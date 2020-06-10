@@ -36,7 +36,7 @@ from .objects.message import MessageGroup, factory_message
 from .objects.number_status import NumberStatus
 from .wapi_js_wrapper import WapiJsWrapper
 
-__version__ = '1.2.0'
+__version__ = '1.2.1'
 
 
 class WhatsAPIDriverStatus(object):
@@ -72,30 +72,10 @@ class WhatsAPIDriver(object):
     _LOCAL_STORAGE_FILE = 'localStorage.json'
 
     _SELECTORS = {
-        'firstrun': "#wrapper",
         'qrCode': "canvas[aria-label=\"Scan me!\"]",
         'qrCodePlain': "div[data-ref]",
         'QRReloader': 'div[data-ref] > span > div',
-        'mainPage': ".app.two",
-        'chatList': ".infinite-list-viewport",
-        'messageList': "#main > div > div:nth-child(1) > div > div.message-list",
-        'unreadMessageBar': "#main > div > div:nth-child(1) > div > div.message-list > div.msg-unread",
-        'searchBar': ".input",
-        'searchCancel': ".icon-search-morph",
-        'chats': ".infinite-list-item",
-        'chatBar': 'div.input',
-        'sendButton': 'button.icon:nth-child(3)',
-        'LoadHistory': '.btn-more',
-        'UnreadBadge': '.icon-meta',
-        'UnreadChatBanner': '.message-list',
-        'ReconnectLink': '.action',
-        'WhatsappQrIcon': 'span.icon:nth-child(2)',
-    }
-
-    _CLASSES = {
-        'unreadBadge': 'icon-meta',
-        'messageContent': "message-text",
-        'messageList': "msg"
+        'mainPage': ".two",
     }
 
     logger = logging.getLogger(__name__)
