@@ -36,7 +36,7 @@ from .objects.message import MessageGroup, factory_message
 from .objects.number_status import NumberStatus
 from .wapi_js_wrapper import WapiJsWrapper
 
-__version__ = '1.2.1'
+__version__ = '1.3.0'
 
 
 class WhatsAPIDriverStatus(object):
