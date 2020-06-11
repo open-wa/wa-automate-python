@@ -66,7 +66,10 @@ class WapiJsWrapper(object):
 
         result = self.driver.execute_script("if (document.querySelector('*[data-icon=chat]') !== null) { return true } else { return false }")
         if result:
-            with open(os.path.join(script_path, "js", "wapi.js"), "r") as script:
+            wapi_js = requests.get('https://raw.githubusercontent.com/open-wa/wa-automate-nodejs/master/src/lib/wapi.js')
+            self.driver.execute_script(wapi_js.content.decode())
+
+            with open(os.path.join(script_path, "js", "pywapi.js"), "r") as script:
                 self.driver.execute_script(script.read())
 
             result = self.driver.execute_script("return Object.keys(window.WAPI)")

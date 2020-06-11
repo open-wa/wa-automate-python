@@ -12,7 +12,10 @@ if (!window.Store || !window.Store.Msg) {
     function getStore(modules) {
       let foundCount = 0;
       let neededObjects = [
-        { id: "Store", conditions: (module) => (module.default && module.default.Chat && module.default.Msg) ? module.default : null},
+        {
+          id: "Store",
+          conditions: (module) => (module.default && module.default.Chat && module.default.Msg) ? module.default : null
+        },
         {
           id: "MediaCollection",
           conditions: (module) => (module.default && module.default.prototype && (module.default.prototype.processFiles !== undefined || module.default.prototype.processAttachments !== undefined)) ? module.default : null
@@ -751,6 +754,7 @@ window.WAPI.getLastSeen = async function (id) {
       presence.on('change:chatstate.t', (data) => {
         resolve(data.t)
       });
+      setTimeout(() => resolve(false), 3000)
       presence.subscribe()
     }
   });
@@ -1244,7 +1248,6 @@ WAPI._newMessagesBuffer = (sessionStorage.getItem('saved_msgs') != null) ? JSON.
 WAPI._newAcksBuffer = (sessionStorage.getItem('saved_acks') != null) ? JSON.parse(sessionStorage.getItem('saved_acks')) : [];
 WAPI._participantChangesBuffer = (sessionStorage.getItem('parti_changes') != null) ? JSON.parse(sessionStorage.getItem('parti_changes')) : [];
 WAPI._liveLocUpdatesBuffer = (sessionStorage.getItem('liveloc_updates') != null) ? JSON.parse(sessionStorage.getItem('liveloc_updates')) : [];
-WAPI._newAcksBuffer = (sessionStorage.getItem('saved_acks') != null) ? JSON.parse(sessionStorage.getItem('saved_acks')) : [];
 WAPI._newMessagesDebouncer = null;
 WAPI._newMessagesCallbacks = [];
 
