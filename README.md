@@ -79,6 +79,9 @@ You will need to install [Gecko Driver](https://github.com/mozilla/geckodriver) 
 - Install from pip
 `pip install openwa`
 
+- Upgrade to latest version with
+`pip install --upgrade openwa`
+
 ## Usage
 
 ### 1. Import library
