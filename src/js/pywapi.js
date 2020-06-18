@@ -120,15 +120,15 @@ window.WAPI._onParticipantsChanged = function (groupId, callback) {
 
 WAPI.getBufferedEvents = function () {
   let bufferedEvents = {
-    'new_msgs': WAPI._newMessagesBuffer,
-    'new_acks': WAPI._newAcksBuffer,
-    'parti_changes': WAPI._participantChangesBuffer,
-    'liveloc_updates': WAPI._liveLocUpdatesBuffer,
+    'new_msgs': _WAPI._newMessagesBuffer,
+    'new_acks': _WAPI._newAcksBuffer,
+    'parti_changes': _WAPI._participantChangesBuffer,
+    'liveloc_updates': _WAPI._liveLocUpdatesBuffer,
   };
-  WAPI._newMessagesBuffer = [];
-  WAPI._newAcksBuffer = [];
-  WAPI._participantChangesBuffer = [];
-  WAPI._liveLocUpdatesBuffer = [];
+  _WAPI._newMessagesBuffer = [];
+  _WAPI._newAcksBuffer = [];
+  _WAPI._participantChangesBuffer = [];
+  _WAPI._liveLocUpdatesBuffer = [];
 
   return bufferedEvents;
 };
