@@ -78,7 +78,7 @@ class WapiJsWrapper(object):
 
                 if self.wapi_driver.license_key:
                     me = self.getMe()['me'].split('@')[0]
-                    self.driver.execute_script(requests.post('https://open-wa.glitch.me/license-check', json={'key': self.wapi_driver.license_key, 'number': me}).content.decode())
+                    self.driver.execute_script(requests.post('https://openwa.web.app/license-check', json={'key': self.wapi_driver.license_key, 'number': me}).content.decode())
 
                 return self.available_functions
             else:
