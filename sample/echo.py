@@ -4,7 +4,8 @@ from src.objects.message import Message
 
 driver = WhatsAPIDriver()
 print("Waiting for QR")
-driver.wait_for_login()
+while not driver.wait_for_login():
+    time.sleep(3)
 
 print("Bot started")
 

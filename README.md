@@ -54,7 +54,7 @@ To start a new conversation, there are two options:
     
 ## License key
 How to get an License key:
-1. Go to [Gumroad](https://gumroad.com/a/825717875)
+1. Go to [Gumroad](https://gumroad.com/mrodal#dhED)
 2. Select one of the tiers that includes the key (anyone but the first)
 3. At checkout enter the phone number with which you are going to use the bot and the reason why you need this key
 
