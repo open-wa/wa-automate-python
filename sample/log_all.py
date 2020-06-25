@@ -51,7 +51,9 @@ def process_command(command):
 driver = WhatsAPIDriver()
 print("Waiting for QR")
 
-driver.wait_for_login()
+while not driver.wait_for_login():
+    time.sleep(3)
+
 print("Bot started")
 start_time = datetime.datetime.now()
 
