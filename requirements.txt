@@ -6,4 +6,4 @@ cryptography
 typing
 Pillow
 requests
-python-magic-bin
+python-magic
