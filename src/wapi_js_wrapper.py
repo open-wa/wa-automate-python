@@ -77,7 +77,10 @@ class WapiJsWrapper(object):
                 self.available_functions = result
 
                 if self.wapi_driver.license_key:
-                    me = self.getMe()['me'].split('@')[0]
+                    me = self.getMe()
+                    if isinstance(me, dict):
+                        me = self.getMe()['wid']
+                    me = me.split('@')[0]
                     self.driver.execute_script(requests.post('https://openwa.web.app/license-check', json={'key': self.wapi_driver.license_key, 'number': me}).content.decode())
 
                 return self.available_functions
