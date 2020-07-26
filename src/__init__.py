@@ -219,10 +219,17 @@ class WhatsAPIDriver(object):
                 self._profile = webdriver.FirefoxProfile(self._profile_path)
             else:
                 self._profile = webdriver.FirefoxProfile()
+
+            options = Options()
+
+            if headless:
+                options.headless = True
+            
             capabilities = DesiredCapabilities.FIREFOX.copy()
             self.driver = webdriver.Remote(
                 command_executor=command_executor,
                 desired_capabilities=capabilities,
+                options=options,
                 **extra_params
             )
 
