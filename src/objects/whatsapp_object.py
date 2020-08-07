@@ -78,7 +78,10 @@ class WhatsappObjectWithId(WhatsappObject):
         if 'name' in js_obj:
             self.name = js_obj["name"]
         if 'contact' in js_obj:
-            self.name = js_obj["contact"]['name']
+            try:
+                self.name = js_obj["contact"]['name']
+            except KeyError:
+                self.name=str((self.id).replace('@c.us', ''))
 
     def __hash__(self):
         return hash(self.id)
