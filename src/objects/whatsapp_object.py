@@ -11,11 +11,11 @@ def driver_needed(func):
     :return: Wrapped method
     """
 
-    def wrapped(self, *args):
+    def wrapped(self, *args, **kwargs):
         if not self.driver:
             raise AttributeError("No driver passed to object")
 
-        return func(self, *args)
+        return func(self, *args, **kwargs)
 
     return wrapped
 

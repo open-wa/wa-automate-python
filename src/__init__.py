@@ -36,7 +36,7 @@ from .objects.message import MessageGroup, factory_message
 from .objects.number_status import NumberStatus
 from .wapi_js_wrapper import WapiJsWrapper
 
-__version__ = '1.3.1'
+__version__ = '1.3.4'
 
 
 class WhatsAPIDriverStatus(object):
@@ -166,6 +166,8 @@ class WhatsAPIDriver(object):
                 # Disable Flash
                 self._profile.set_preference('dom.ipc.plugins.enabled.libflashplayer.so',
                                              'false')
+            # Defaults to no proxy
+            self._profile.set_preference("network.proxy.type", 0)
             if proxy is not None:
                 self.set_proxy(proxy)
 
@@ -666,12 +668,10 @@ class WhatsAPIDriver(object):
 
         return isinstance(result, str)
 
-    def reply_message(self, message_id, message):
-        result = self.wapi_functions.ReplyMessage(message_id, message)
+    def reply_message(self, chat_id, message_id, message):
+        result = self.wapi_functions.reply(chat_id, message, message_id)
 
-        if not isinstance(result, bool):
-            return factory_message(result, self)
-        return result
+        return bool(result)
 
     def forward_messages(self, chat_id_to, message_ids, skip_my_messages=False):
         return self.wapi_functions.forwardMessages(chat_id_to, message_ids, skip_my_messages)

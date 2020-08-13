@@ -119,7 +119,8 @@ The QR code is automatically reloaded if it has expired
 ### 5. Scan the QR code with your phone
 Once you scan the QR obtained, you are ready to use the rest of the funcionality 
 
-### Viewing unread messages
+### Viewing messages
+Before loading messages, 
 
     unread_messages = driver.get_unread()
 

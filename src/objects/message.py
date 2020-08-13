@@ -75,7 +75,7 @@ class Message(WhatsappObject):
 
     @driver_needed
     def reply_message(self, message):
-        return self.driver.reply_message(self.id, message)
+        return self.driver.reply_message(self.chat_id, self.id, message)
 
 
 
