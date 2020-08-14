@@ -133,6 +133,13 @@ WAPI.getBufferedEvents = function () {
   return bufferedEvents;
 };
 
+window.WAPI._newAcksListener = Store.Msg.on("change:ack", msg => {
+  debugger
+  let message = window.WAPI.processMessageObj(msg, true, false);
+  if (message) {
+    window._WAPI._newAcksBuffer.push(message)
+  }
+});
 
 /**
  * This next line is jsSha
