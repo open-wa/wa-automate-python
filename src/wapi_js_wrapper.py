@@ -1,3 +1,4 @@
+import json
 import os
 import time
 from enum import Enum, auto
@@ -68,6 +69,10 @@ class WapiJsWrapper(object):
         if result:
             wapi_js = requests.get('https://raw.githubusercontent.com/open-wa/wa-automate-nodejs/master/src/lib/wapi.js')
             self.driver.execute_script(wapi_js.content.decode())
+
+            patches = json.loads(requests.get('https://raw.githubusercontent.com/open-wa/wa-automate-nodejs/master/patches.json').content.decode())
+            for patch in patches:
+                self.driver.execute_script(patch)
 
             with open(os.path.join(script_path, "js", "pywapi.js"), "r") as script:
                 self.driver.execute_script(script.read())
