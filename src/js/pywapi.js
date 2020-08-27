@@ -51,7 +51,7 @@ window.WAPI.onParticipantsChanged = function (groupId, callback) {
         action: action,
         who: eventData.id._serialized
       };
-      WAPI._participantChangesBuffer.push(event);
+      _WAPI._participantChangesBuffer.push(event);
       callback(event);
     }
   })
@@ -106,7 +106,7 @@ window.WAPI._onParticipantsChanged = function (groupId, callback) {
               who: recipients
             };
             callback(event);
-            WAPI._participantChangesBuffer.push(event);
+            _WAPI._participantChangesBuffer.push(event);
             chat.off("all", this)
             i = 0;
           }
