@@ -136,8 +136,12 @@ class WhatsAPIDriver(object):
 
     def __init__(self, client="firefox", username="API", proxy=None, command_executor=None, loadstyles=False,
                  profile=None, headless=False, autoconnect=True, logger=None, extra_params=None, chrome_options=None,
-                 executable_path=None, script_timeout=60, element_timeout=30, license_key=None):
+                 executable_path=None, script_timeout=60, element_timeout=30, license_key=None, wapi_version="master"):
         """Initialises the webdriver"""
+        """
+            Note:
+            wapi_version: see https://github.com/open-wa/wa-automate-nodejs/releases, configurable starting from 2.0.0
+        """
 
         self.logger = logger or self.logger
         self.license_key = license_key
@@ -226,7 +230,7 @@ class WhatsAPIDriver(object):
 
             if headless:
                 options.headless = True
-            
+
             capabilities = DesiredCapabilities.FIREFOX.copy()
             self.driver = webdriver.Remote(
                 command_executor=command_executor,
@@ -238,7 +242,7 @@ class WhatsAPIDriver(object):
         else:
             self.logger.error("Invalid client: %s" % client)
         self.username = username
-        self.wapi_functions = WapiJsWrapper(self.driver, self)
+        self.wapi_functions = WapiJsWrapper(self.driver, self, wapi_version)
 
         self.driver.set_script_timeout(script_timeout)
         self.element_timeout = element_timeout

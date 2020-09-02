@@ -25,10 +25,11 @@ class WapiJsWrapper(object):
     Wraps JS functions in window.WAPI for easier use from python
     """
 
-    def __init__(self, driver, wapi_driver):
+    def __init__(self, driver, wapi_driver, wapi_version="master"):
         self.driver = driver
         self.wapi_driver = wapi_driver
         self.available_functions = None
+        self.wapi_version = wapi_version
 
         # Starts new messages observable thread.
         self.new_messages_observable = NewMessagesObservable(self, wapi_driver, driver)
@@ -67,10 +68,12 @@ class WapiJsWrapper(object):
 
         result = self.driver.execute_script("if (document.querySelector('*[data-icon=chat]') !== null) { return true } else { return false }")
         if result:
-            wapi_js = requests.get('https://raw.githubusercontent.com/open-wa/wa-automate-nodejs/master/src/lib/wapi.js')
+            wapi_url = 'https://raw.githubusercontent.com/open-wa/wa-automate-nodejs/{}/src/lib/wapi.js'.format(self.wapi_version)
+            wapi_js = requests.get(wapi_url)
             self.driver.execute_script(wapi_js.content.decode())
 
-            patches = json.loads(requests.get('https://raw.githubusercontent.com/open-wa/wa-automate-nodejs/master/patches.json').content.decode())
+            patch_url = 'https://raw.githubusercontent.com/open-wa/wa-automate-nodejs/{}/patches.json'.format(self.wapi_version)
+            patches = json.loads(requests.get(patch_url).content.decode())
             for patch in patches:
                 self.driver.execute_script(patch)
 
