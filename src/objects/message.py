@@ -96,7 +96,7 @@ class MediaMessage(Message):
             self.caption = self._js_obj["caption"] or ""
 
         self.media_key = self._js_obj.get('mediaKey')
-        self.client_url = self._js_obj.get('clientUrl')
+        self.client_url = self._js_obj.get('deprecatedMms3Url')
 
         extension = mimetypes.guess_extension(self.mime or '')
         self.filename = ''.join([str(id(self)), extension or ''])
