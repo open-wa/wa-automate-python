@@ -25,7 +25,7 @@ def factory_message(js_obj, driver):
     if "lat" in js_obj and "lng" in js_obj and js_obj["lat"] and js_obj["lng"]:
         return GeoMessage(js_obj, driver)
 
-    if js_obj["isMedia"]:
+    if js_obj["mediaData"]:
         return MediaMessage(js_obj, driver)
 
     if js_obj["isNotification"]:
@@ -59,7 +59,7 @@ class Message(WhatsappObject):
         self.timestamp = datetime.fromtimestamp(js_obj["timestamp"])
         self.chat_id = js_obj['chatId']
 
-        if js_obj["content"]:
+        if 'content' in js_obj and js_obj["content"]:
             self.content = js_obj["content"]
             self.safe_content = safe_str(self.content[0:25]) + '...'
         elif self.type == 'revoked':
@@ -78,7 +78,6 @@ class Message(WhatsappObject):
         return self.driver.reply_message(self.chat_id, self.id, message)
 
 
-
 class MediaMessage(Message):
     crypt_keys = {'document': '576861747341707020446f63756d656e74204b657973',
                   'image': '576861747341707020496d616765204b657973',
@@ -90,7 +89,7 @@ class MediaMessage(Message):
     def __init__(self, js_obj, driver=None):
         super(MediaMessage, self).__init__(js_obj, driver)
 
-        self.size = self._js_obj["size"]
+        self.size = self._js_obj.get("size", None)
         self.mime = self._js_obj["mimetype"]
         if "caption" in self._js_obj:
             self.caption = self._js_obj["caption"] or ""
