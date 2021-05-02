@@ -36,7 +36,7 @@ from .objects.message import MessageGroup, factory_message
 from .objects.number_status import NumberStatus
 from .wapi_js_wrapper import WapiJsWrapper
 
-__version__ = '1.3.12'
+__version__ = '1.3.13'
 
 
 class WhatsAPIDriverStatus(object):
@@ -700,9 +700,16 @@ class WhatsAPIDriver(object):
         :param caption:
         :return:
         """
-        imgBase64 = convert_to_base64(path)
+        base64 = convert_to_base64(path)
         filename = os.path.split(path)[-1]
-        return self.wapi_functions.sendImage(imgBase64, chatid, filename, caption)
+        return self.wapi_functions.sendImage(base64, chatid, filename, caption)
+
+    def send_voice_note(self, path, chatid):
+        """
+        Attempts to send a file as a voice note
+        """
+        base64 = convert_to_base64(path)
+        return self.wapi_functions.sendImage(base64, chatid, 'ptt.ogg', '', None, True, True)
 
     def send_video_as_gif(self, path, chatid, caption):
         """

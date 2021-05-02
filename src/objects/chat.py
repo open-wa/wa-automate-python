@@ -34,6 +34,10 @@ class Chat(WhatsappObjectWithId):
         return self.driver.send_media(image_path, self.id, caption)
 
     @driver_needed
+    def send_voice_note(self, file_path):
+        return self.driver.send_voice_note(file_path, self.id)
+
+    @driver_needed
     def send_video_as_gif(self, image_path, caption=None):
         return self.driver.send_video_as_gif(image_path, self.id, caption)
 
