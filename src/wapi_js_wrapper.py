@@ -69,11 +69,15 @@ class WapiJsWrapper(object):
         result = self.driver.execute_script("if (document.querySelector('*[data-icon=chat]') !== null) { return true } else { return false }")
         if result:
             if self.wapi_version == 'master':
-                 self.wapi_version = json.loads(requests.get(f'https://raw.githubusercontent.com/open-wa/wa-automate-nodejs/master/package.json').content)['version']
+                patches_url = 'https://cdn.openwa.dev/patches.json'
+                self.wapi_version = json.loads(requests.get(f'https://raw.githubusercontent.com/open-wa/wa-automate-nodejs/master/package.json').content)['version']
+            else:
+                patches_url = f'https://raw.githubusercontent.com/open-wa/wa-automate-nodejs/{self.wapi_version}/patches.json'
+
             wapi_js = requests.get(f'https://raw.githubusercontent.com/open-wa/wa-automate-nodejs/{self.wapi_version}/src/lib/wapi.js')
             self.driver.execute_script(wapi_js.content.decode())
 
-            patches = json.loads(requests.get(f'https://raw.githubusercontent.com/open-wa/wa-automate-nodejs/{self.wapi_version}/patches.json').content.decode())
+            patches = json.loads(requests.get(patches_url).content.decode())
             for patch in patches:
                 self.driver.execute_script(patch)
 
