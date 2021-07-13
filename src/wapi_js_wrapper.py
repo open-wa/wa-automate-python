@@ -74,6 +74,10 @@ class WapiJsWrapper(object):
             else:
                 patches_url = f'https://raw.githubusercontent.com/open-wa/wa-automate-nodejs/{self.wapi_version}/patches.json'
 
+            # Fix for elusive webpack object
+            self.driver.execute_script(
+                'if(window.webpackChunkwhatsapp_web_client) {window.webpackChunkbuild = window.webpackChunkwhatsapp_web_client} else {(function(){const f = Object.entries(window).filter(([,o])=>o && o.push && (o.push != [].push));if(f[0]) {window.webpackChunkbuild = window[f[0][0]]}})()} return (typeof webpackChunkbuild !== "undefined")')
+
             wapi_js = requests.get(f'https://raw.githubusercontent.com/open-wa/wa-automate-nodejs/{self.wapi_version}/src/lib/wapi.js')
             self.driver.execute_script(wapi_js.content.decode())
 
