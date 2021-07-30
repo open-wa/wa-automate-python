@@ -74,7 +74,7 @@ class WhatsAPIDriver(object):
     _SELECTORS = {
         'qrCode': "canvas[aria-label=\"Scan me!\"]",
         'qrCodePlain': "div[data-ref]",
-        'QRReloader': 'div[data-ref] > span > div',
+        'QRReloader': 'div[data-ref] > span > button',
         'mainPage': ".two",
     }
 
