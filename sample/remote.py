@@ -15,7 +15,7 @@ except KeyError:
 ##The profile parameter requires a directory not a file.
 profiledir = os.path.join(".", "firefox_cache")
 if not os.path.exists(profiledir): os.makedirs(profiledir)
-driver = WhatsAPIDriver(profile=profiledir, client='remote', command_executor=os.environ["SELENIUM"])
+driver = WhatsAPIDriver(profile=profiledir, client='firefox', remote=True, command_executor=os.environ["SELENIUM"])
 print("Waiting for QR")
 driver.wait_for_login()
 print("Saving session")
