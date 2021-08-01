@@ -99,7 +99,8 @@ driver = WhatsAPIDriver()
 
 Possible arguments for constructor:
 
-- client : Type of browser. The default is Firefox, but Chrome and Remote is supported too. See sample directory for remote examples.
+- client : Type of browser. The default is `firefox`, but `chrome` is also supported.
+- remote: Defines if webdriver will be loaded as remote. See sample directory for remote examples.
 - username : Can be any value.
 - proxy: The proxy server to configure selenium to. Format is "<proxy>:<portnumber>"
 - command_executor: Passed directly as an argument to Remote Selenium. Ignore if not using it. See sample directory for remote examples. 
