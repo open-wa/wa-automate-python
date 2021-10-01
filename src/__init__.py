@@ -36,7 +36,7 @@ from .objects.message import MessageGroup, factory_message
 from .objects.number_status import NumberStatus
 from .wapi_js_wrapper import WapiJsWrapper
 
-__version__ = '1.3.10'
+__version__ = '1.3.15'
 
 
 class WhatsAPIDriverStatus(object):
@@ -74,7 +74,7 @@ class WhatsAPIDriver(object):
     _SELECTORS = {
         'qrCode': "canvas[aria-label=\"Scan me!\"]",
         'qrCodePlain': "div[data-ref]",
-        'QRReloader': 'div[data-ref] > span > div',
+        'QRReloader': 'div[data-ref] > span > button',
         'mainPage': ".two",
     }
 
@@ -135,12 +135,13 @@ class WhatsAPIDriver(object):
         self.driver.close()
 
     def __init__(self, client="firefox", username="API", proxy=None, command_executor=None, loadstyles=False,
-                 profile=None, headless=False, autoconnect=True, logger=None, extra_params=None, chrome_options=None,
+                 profile=None, remote=False, headless=False, autoconnect=True, logger=None, extra_params=None, chrome_options=None,
                  executable_path=None, script_timeout=60, element_timeout=30, license_key=None, wapi_version='master'):
         """Initialises the webdriver"""
 
         self.logger = logger or self.logger
         self.license_key = license_key
+        self.remote = remote
         extra_params = extra_params or {}
 
         if profile is not None:
@@ -181,21 +182,33 @@ class WhatsAPIDriver(object):
             capabilities = DesiredCapabilities.FIREFOX.copy()
             capabilities['webStorageEnabled'] = True
 
-            self.logger.info("Starting webdriver")
-            if executable_path is not None:
-                executable_path = os.path.abspath(executable_path)
 
-                self.logger.info("Starting webdriver")
-                self.driver = webdriver.Firefox(capabilities=capabilities, options=options,
-                                                executable_path=executable_path,
-                                                **extra_params)
+            if self.remote:
+                self.logger.info("Starting Firefox remote webdriver")
+
+                self.driver = webdriver.Remote(
+                    command_executor=command_executor,
+                    desired_capabilities=capabilities,
+                    options=options,
+                    **extra_params
+                )
+                
             else:
-                self.logger.info("Starting webdriver")
-                self.driver = webdriver.Firefox(capabilities=capabilities, options=options,
-                                                **extra_params)
+                self.logger.info("Starting Firefox webdriver")
+
+                if executable_path is not None:
+                    executable_path = os.path.abspath(executable_path)
+
+                    self.driver = webdriver.Firefox(capabilities=capabilities, options=options,
+                                                    executable_path=executable_path,
+                                                    **extra_params)
+                else:
+                    self.driver = webdriver.Firefox(capabilities=capabilities, options=options,
+                                                    **extra_params)
 
         elif self.client == "chrome":
             self._profile = webdriver.ChromeOptions()
+
             if self._profile_path is not None:
                 self._profile.add_argument("--user-data-dir=%s" % self._profile_path)
             if proxy is not None:
@@ -209,14 +222,28 @@ class WhatsAPIDriver(object):
                 for option in chrome_options:
                     self._profile.add_argument(option)
 
-            if executable_path is not None:
-                self.logger.info("Starting webdriver")
-                self.driver = webdriver.Chrome(executable_path=executable_path, chrome_options=self._profile, **extra_params)
+            capabilities = DesiredCapabilities.CHROME.copy()
+
+            if self.remote:
+                self.logger.info("Starting Chrome remote webdriver")
+                self.driver = webdriver.Remote(
+                    command_executor=command_executor,
+                    desired_capabilities=capabilities,
+                    options=self._profile,
+                    **extra_params
+                )
+
             else:
-                self.logger.info("Starting webdriver")
-                self.driver = webdriver.Chrome(chrome_options=self._profile, **extra_params)
+                self.logger.info("Starting Chrome webdriver")
+
+                if executable_path is not None:
+                    self.driver = webdriver.Chrome(executable_path=executable_path, chrome_options=self._profile, **extra_params)
+                else:
+                    self.driver = webdriver.Chrome(chrome_options=self._profile, **extra_params)
 
         elif client == 'remote':
+            self.logger.warning("Client type 'remote' is deprecated and might be removed in future versions. Please, use the method attribute 'remote = True' instead.")
+
             if self._profile_path is not None:
                 self._profile = webdriver.FirefoxProfile(self._profile_path)
             else:
@@ -700,9 +727,16 @@ class WhatsAPIDriver(object):
         :param caption:
         :return:
         """
-        imgBase64 = convert_to_base64(path)
+        base64 = convert_to_base64(path)
         filename = os.path.split(path)[-1]
-        return self.wapi_functions.sendImage(imgBase64, chatid, filename, caption)
+        return self.wapi_functions.sendImage(base64, chatid, filename, caption)
+
+    def send_voice_note(self, path, chatid):
+        """
+        Attempts to send a file as a voice note
+        """
+        base64 = convert_to_base64(path)
+        return self.wapi_functions.sendImage(base64, chatid, 'ptt.ogg', '', None, True, True)
 
     def send_video_as_gif(self, path, chatid, caption):
         """
