@@ -721,7 +721,8 @@ class WhatsAPIDriver(object):
         webp_img = io.BytesIO()
         code  = [0x00,0x00,0x16,0x00,0x00,0x00]
         exif = {"sticker-pack-id": sticker_pack_id,"sticker-pack-name": packname,"sticker-pack-publisher": author,"android-app-store-link": googlelink,"ios-app-store-link": applelink}
-        if (length:=exif.__str__().__len__()) > 256:
+        length = exif.__str__().__len__()
+        if length > 256:
             length -=256
             code.insert(0, 0x01)
         else:
