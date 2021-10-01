@@ -703,18 +703,30 @@ class WhatsAPIDriver(object):
     def forward_messages(self, chat_id_to, message_ids, skip_my_messages=False):
         return self.wapi_functions.forwardMessages(chat_id_to, message_ids, skip_my_messages)
 
-    def send_image_as_sticker(self, path, chatid):
+    def send_image_as_sticker(self, path, chatid, sticker_pack_id="openwa", packname="openwa", author="openwa", googlelink="https://openwa.dev", applelink="https://openwa.dev"):
         """
         Converts the file to base64 and sends it using the sendImageAsSticker function of wapi.js
         :param path: file path
         :param chatid: chatId to be sent
         :param caption:
+        :param sticker_pack_id:
+        :param packname:
+        :param author: sticker
+        :paran: googlelink
+        :param applelink:
         :return:
         """
         img = Image.open(path)
         img.thumbnail((512, 512))
         webp_img = io.BytesIO()
-        img.save(webp_img, 'webp')
+        code  = [0x00,0x00,0x16,0x00,0x00,0x00]
+        exif = {"sticker-pack-id": sticker_pack_id,"sticker-pack-name": packname,"sticker-pack-publisher": author,"android-app-store-link": googlelink,"ios-app-store-link": applelink}
+        if (length:=exif.__str__().__len__()) > 256:
+            length -=256
+            code.insert(0, 0x01)
+        else:
+            code.insert(0, 0x00)
+        img.save(webp_img, 'webp', exif=bytes([0x49, 0x49, 0x2A, 0x00, 0x08, 0x00, 0x00, 0x00, 0x01, 0x00, 0x41, 0x57, 0x07, 0x00])+bytes([int("0x0"+hex(length)[2:].__str__() if length < 16 else hex(length)[2:].__str__(), 16)])+bytes(code)+exif.__str__().encode())
         webp_img.seek(0)
         imgBase64 = convert_to_base64(webp_img, is_thumbnail=True)
         return self.wapi_functions.sendImageAsSticker(imgBase64, chatid, {})
