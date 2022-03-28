@@ -1,7 +1,10 @@
+# PLEASE CONSIDER USING [wa-automate-socket-client-python](https://github.com/open-wa/wa-automate-socket-client-python) AS THIS LIBRARY WILL BE DEPRECATED 
+<br/><br/><br/><br/>
 <div align="center">
 <img src="https://raw.githubusercontent.com/open-wa/wa-automate-nodejs/master/resources/hotfix-logo.png" width="128" height="128"/>
 
 # wa-automate-python
+
 
 ## (Based on web.whatsapp.com)
 ![PyPI version](https://badge.fury.io/py/openwa.svg)
