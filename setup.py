@@ -30,16 +30,14 @@ with open(path, 'r') as file:
             continue
 
         v = node.value
-        if isinstance(v, ast.Str):
-            version = v.s
+        if isinstance(v, ast.Constant) and isinstance(v.value, str):
+            version = v.value
             break
         if isinstance(v, ast.Tuple):
             r = []
             for e in v.elts:
-                if isinstance(e, ast.Str):
-                    r.append(e.s)
-                elif isinstance(e, ast.Num):
-                    r.append(str(e.n))
+                if isinstance(e, ast.Constant) and type(e.value) in (str, int, float, complex):
+                    r.append(str(e.value))
             version = '.'.join(r)
             break
 
